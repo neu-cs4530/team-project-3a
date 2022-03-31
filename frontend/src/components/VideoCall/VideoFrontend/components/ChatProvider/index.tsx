@@ -47,7 +47,6 @@ export const ChatProvider: React.FC = ({ children }) => {
       conversation.onMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
       conversation.onMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
 
-      // TODO: Add other chat types
       return () => {
         conversation.offMessageAdded(handleMessageAdded, ChatType.UNVIERSAL);
         conversation.offMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
