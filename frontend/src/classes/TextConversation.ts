@@ -31,7 +31,7 @@ export default class TextConversation {
       message.dateCreated = new Date(message.dateCreated);
 
       switch (message.chatType) {
-        case ChatType.UNVIERSAL:
+        case ChatType.UNIVERSAL:
           this.onChatMessage(message);
           break;
         case ChatType.PROXIMITY:
@@ -69,6 +69,7 @@ export default class TextConversation {
       author: this._authorName,
       dateCreated: new Date(),
     };
+    console.log(msg);
     this._socket.emit('chatMessage', msg);
   }
 
@@ -80,7 +81,7 @@ export default class TextConversation {
    */
   public onMessageAdded(cb: MessageCallback, chatType: ChatType) {
     switch (chatType) {
-      case ChatType.UNVIERSAL:
+      case ChatType.UNIVERSAL:
         this._callbacks.push(cb);
         break;
       case ChatType.PROXIMITY:
@@ -100,7 +101,7 @@ export default class TextConversation {
    */
   public offMessageAdded(cb: MessageCallback, chatType: ChatType) {
     switch (chatType) {
-      case ChatType.UNVIERSAL:
+      case ChatType.UNIVERSAL:
         this._callbacks = this._callbacks.filter(_cb => _cb !== cb);
         break;
       case ChatType.PROXIMITY:

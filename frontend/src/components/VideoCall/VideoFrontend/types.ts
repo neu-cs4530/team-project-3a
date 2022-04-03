@@ -47,7 +47,7 @@ export type RecordingRule = {
 export type RecordingRules = RecordingRule[];
 
 export enum ChatType {
-  UNVIERSAL = 'Universal',
+  UNIVERSAL = 'Universal',
   PROXIMITY = 'Proximity',
   DIRECT = 'Direct',
 }

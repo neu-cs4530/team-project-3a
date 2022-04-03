@@ -26,7 +26,7 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [proximityMessages, setProximityMessages] = useState<ChatMessage[]>([]);
   const [directMessages, setDirectMessages] = useState<{ [playerID: string]: ChatMessage[] }>({});
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
-  const [chatType, setChatType] = useState(ChatType.UNVIERSAL);
+  const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
 
   useEffect(() => {
     if (conversation) {
@@ -43,12 +43,12 @@ export const ChatProvider: React.FC = ({ children }) => {
         });
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
-      conversation.onMessageAdded(handleMessageAdded, ChatType.UNVIERSAL);
+      conversation.onMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
       conversation.onMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
       conversation.onMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
 
       return () => {
-        conversation.offMessageAdded(handleMessageAdded, ChatType.UNVIERSAL);
+        conversation.offMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
         conversation.offMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
         conversation.offMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
       };
