@@ -69,7 +69,6 @@ export default class TextConversation {
       author: this._authorName,
       dateCreated: new Date(),
     };
-    console.log(msg);
     this._socket.emit('chatMessage', msg);
   }
 
