@@ -1,19 +1,19 @@
-import React from 'react';
-import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
-import ChatWindowHeader from './ChatWindowHeader/ChatWindowHeader';
-import ChatInput from './ChatInput/ChatInput';
+import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import MessageList from './MessageList/MessageList';
+import React from 'react';
 import useChatContext from '../../hooks/useChatContext/useChatContext';
+import ChatInput from './ChatInput/ChatInput';
+import ChatWindowHeader from './ChatWindowHeader/ChatWindowHeader';
+import MessageList from './MessageList/MessageList';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     chatWindowContainer: {
-      background: '#FFFFFF',
-      zIndex: 1000,
-      display: 'flex',
-      flexDirection: 'column',
-      borderLeft: '1px solid #E4E7E9',
+      'background': '#FFFFFF',
+      'zIndex': 1000,
+      'display': 'flex',
+      'flexDirection': 'column',
+      'borderLeft': '1px solid #E4E7E9',
       [theme.breakpoints.down('sm')]: {
         position: 'fixed',
         top: 0,
@@ -22,16 +22,16 @@ const useStyles = makeStyles((theme: Theme) =>
         right: 0,
         zIndex: 100,
       },
-      position: 'fixed',
-      bottom: 0,
-      left: 0,
-      top: 0,
-      'max-width': '250px'
+      'position': 'fixed',
+      'bottom': 0,
+      'left': 0,
+      'top': 0,
+      'max-width': '250px',
     },
     hide: {
       display: 'none',
     },
-  })
+  }),
 );
 
 // In this component, we are toggling the visibility of the ChatWindow with CSS instead of
@@ -40,13 +40,17 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ChatWindow() {
   const classes = useStyles();
-  const { isChatWindowOpen, messages, conversation } = useChatContext();
+  const { isChatWindowOpen, messages, conversation, chatType } = useChatContext();
 
   return (
     <aside className={clsx(classes.chatWindowContainer, { [classes.hide]: !isChatWindowOpen })}>
       <ChatWindowHeader />
       <MessageList messages={messages} />
-      <ChatInput conversation={conversation!} isChatWindowOpen={isChatWindowOpen} />
+      <ChatInput
+        conversation={conversation!}
+        isChatWindowOpen={isChatWindowOpen}
+        chatType={chatType}
+      />
     </aside>
   );
 }
