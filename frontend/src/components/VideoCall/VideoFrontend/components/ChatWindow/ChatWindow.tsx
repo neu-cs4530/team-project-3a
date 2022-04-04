@@ -43,8 +43,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ChatWindow() {
   const classes = useStyles();
-  const { isChatWindowOpen, messages, proximityMessages, directMessages, conversation, chatType } = useChatContext();
-  const [directID, setDirectID] = useState('');
+  const { isChatWindowOpen, messages, proximityMessages, directMessages, conversation, chatType, directID, setDirectID } = useChatContext();
 
   return (
     <aside className={clsx(classes.chatWindowContainer, { [classes.hide]: !isChatWindowOpen })}>

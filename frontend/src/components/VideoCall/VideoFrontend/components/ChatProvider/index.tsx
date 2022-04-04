@@ -13,6 +13,9 @@ type ChatContextType = {
   proximityMessages: ChatMessage[];
   directMessages: { [playerID: string]: ChatMessage[] };
   conversation: TextConversation | null;
+  directID: string;
+  setDirectID: (directID: string) => void;
+
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
@@ -27,6 +30,7 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [directMessages, setDirectMessages] = useState<{ [playerID: string]: ChatMessage[] }>({});
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
+  const [directID, setDirectID] = useState('');
 
   useEffect(() => {
     if (conversation) {
@@ -92,6 +96,8 @@ export const ChatProvider: React.FC = ({ children }) => {
         setChatType,
         proximityMessages,
         directMessages,
+        directID,
+        setDirectID
       }}>
       {children}
     </ChatContext.Provider>
