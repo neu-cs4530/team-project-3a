@@ -35,10 +35,10 @@ export default class TextConversation {
           this.onChatMessage(message);
           break;
         case ChatType.PROXIMITY:
-          this.onDirectMessage(message);
+          this.onProximityMessage(message);
           break;
         case ChatType.DIRECT:
-          this.onProximityMessage(message);
+          this.onDirectMessage(message);
           break;
         default:
       }

@@ -36,7 +36,7 @@ export const ChatProvider: React.FC = ({ children }) => {
       const handleProximityMessageAdded = (message: ChatMessage) =>
         setProximityMessages(oldMessages => [...oldMessages, message]);
 
-      const handleDirectMessageAddded = (message: ChatMessage) =>
+      const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages({
           ...directMessages,
           [message.author]: [...directMessages[message.author], message],
@@ -44,12 +44,12 @@ export const ChatProvider: React.FC = ({ children }) => {
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
       conversation.onMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
-      conversation.onMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
+      conversation.onMessageAdded(handleDirectMessageAdded, ChatType.DIRECT);
       conversation.onMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
 
       return () => {
         conversation.offMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
-        conversation.offMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
+        conversation.offMessageAdded(handleDirectMessageAdded, ChatType.DIRECT);
         conversation.offMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
       };
     }
