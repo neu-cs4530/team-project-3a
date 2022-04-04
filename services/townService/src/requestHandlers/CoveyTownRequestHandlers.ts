@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { Socket } from 'socket.io';
 import Player from '../types/Player';
-import { ChatMessage, CoveyTownList, UserLocation } from '../CoveyTypes';
+import { ChatMessage, ChatType, CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 import { ConversationAreaCreateRequest, ServerConversationArea } from '../client/TownsServiceClient';
@@ -204,7 +204,7 @@ export function conversationAreaCreateHandler(_requestData: ConversationAreaCrea
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-function townSocketAdapter(socket: Socket): CoveyTownListener {
+function townSocketAdapter(socket: Socket, socketsToPlayers: Map<string, string>): CoveyTownListener {
   return {
     onPlayerMoved(movedPlayer: Player) {
       socket.emit('playerMoved', movedPlayer);
@@ -226,7 +226,32 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('conversationUpdated', conversation);
     },
     onChatMessage(message: ChatMessage){
-      socket.emit('chatMessage', message);
+      switch(message.chatType){
+        case ChatType.UNIVERSAL: {
+          socket.emit('chatMessage', message);
+          break;
+        }
+        case ChatType.DIRECT: {
+          const recipients = message.recipients;
+          if(recipients && recipients.length === 1){
+            const toSocketId = socketsToPlayers.get(recipients[0])
+            if(toSocketId)
+              socket.to(toSocketId).emit('chatMessage', message);
+          }
+          break;
+        }
+        case ChatType.PROXIMITY: {
+          const recipients = message.recipients;
+          if(recipients && recipients.length > 1){
+            recipients.forEach(recipient => {
+              const toSocketId = socketsToPlayers.get(recipient)
+              if(toSocketId)
+                socket.to(toSocketId).emit('chatMessage', message);
+            })
+          break;
+          }
+        }
+      }
     },
   };
 }
@@ -240,7 +265,6 @@ export function townSubscriptionHandler(socket: Socket): void {
   // Parse the client's session token from the connection
   // For each player, the session token should be the same string returned by joinTownHandler
   const { token, coveyTownID } = socket.handshake.auth as { token: string; coveyTownID: string };
-
   const townController = CoveyTownsStore.getInstance()
     .getControllerForTown(coveyTownID);
 
@@ -254,8 +278,10 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   // Create an adapter that will translate events from the CoveyTownController into
   // events that the socket protocol knows about
-  const listener = townSocketAdapter(socket);
+  const listener = townSocketAdapter(socket, townController.socketsToPlayers);
   townController.addTownListener(listener);
+
+  townController?.updateSocketMap(s.player.id, socket.id)
 
   // Register an event listener for the client socket: if the client disconnects,
   // clean up our listener adapter, and then let the CoveyTownController know that the

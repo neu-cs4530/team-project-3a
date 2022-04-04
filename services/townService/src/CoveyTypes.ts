@@ -10,7 +10,15 @@ export type CoveyTownList = { friendlyName: string; coveyTownID: string; current
 
 export type ChatMessage = {
   author: string;
+  chatType: ChatType;
   sid: string;
   body: string;
   dateCreated: Date;
+  recipients?: string[];
+};
+
+export enum ChatType {
+  UNIVERSAL = 'Universal',
+  PROXIMITY = 'Proximity',
+  DIRECT = 'Direct',
 };
