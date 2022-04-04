@@ -281,7 +281,7 @@ export function townSubscriptionHandler(socket: Socket): void {
   const listener = townSocketAdapter(socket, townController.playerIdToSocketId);
   townController.addTownListener(listener);
 
-  townController?.updateSocketMap(s.player.id, socket.id)
+  townController.updateSocketMap(s.player.id, socket.id)
 
   // Register an event listener for the client socket: if the client disconnects,
   // clean up our listener adapter, and then let the CoveyTownController know that the
