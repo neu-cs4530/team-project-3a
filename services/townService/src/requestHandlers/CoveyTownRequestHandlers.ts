@@ -226,30 +226,33 @@ function townSocketAdapter(socket: Socket, playerIdToSocketId: Map<string, strin
       socket.emit('conversationUpdated', conversation);
     },
     onChatMessage(message: ChatMessage){
-      switch(message.chatType){
+      switch (message.chatType){
         case ChatType.UNIVERSAL: {
           socket.emit('chatMessage', message);
           break;
         }
         case ChatType.DIRECT: {
-          const recipients = message.recipients;
-          if(recipients && recipients.length === 1){
-            const toSocketId = playerIdToSocketId.get(recipients[0])
-            if(toSocketId)
+          const { recipients } = message;
+          if (recipients && recipients.length === 1){
+            const toSocketId = playerIdToSocketId.get(recipients[0]);
+            if (toSocketId)
               socket.to(toSocketId).emit('chatMessage', message);
           }
           break;
         }
         case ChatType.PROXIMITY: {
-          const recipients = message.recipients;
-          if(recipients && recipients.length > 1){
+          const { recipients } = message;
+          if (recipients && recipients.length > 1){
             recipients.forEach(recipient => {
-              const toSocketId = playerIdToSocketId.get(recipient)
-              if(toSocketId)
+              const toSocketId = playerIdToSocketId.get(recipient);
+              if (toSocketId)
                 socket.to(toSocketId).emit('chatMessage', message);
-            })
-          break;
+            });
           }
+          break;
+        }
+        default: {
+          break;
         }
       }
     },
@@ -281,7 +284,7 @@ export function townSubscriptionHandler(socket: Socket): void {
   const listener = townSocketAdapter(socket, townController.playerIdToSocketId);
   townController.addTownListener(listener);
 
-  townController.updateSocketMap(s.player.id, socket.id)
+  townController.updateSocketMap(s.player.id, socket.id);
 
   // Register an event listener for the client socket: if the client disconnects,
   // clean up our listener adapter, and then let the CoveyTownController know that the
