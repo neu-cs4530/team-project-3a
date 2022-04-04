@@ -15,13 +15,12 @@ type ChatContextType = {
   conversation: TextConversation | null;
   directID: string;
   setDirectID: (directID: string) => void;
-
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
 
 export const ChatProvider: React.FC = ({ children }) => {
-  const { socket, userName } = useCoveyAppState();
+  const { socket, userName, myPlayerID } = useCoveyAppState();
   const isChatWindowOpenRef = useRef(false);
   const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
   const [conversation, setConversation] = useState<TextConversation | null>(null);
@@ -43,7 +42,7 @@ export const ChatProvider: React.FC = ({ children }) => {
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages({
           ...directMessages,
-          [message.author]: [...directMessages[message.author], message],
+          [message.senderID]: [...directMessages[message.senderID], message],
         });
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
@@ -76,7 +75,7 @@ export const ChatProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (socket) {
-      const conv = new TextConversation(socket, userName);
+      const conv = new TextConversation(socket, userName, myPlayerID);
       setConversation(conv);
       return () => {
         conv.close();
@@ -97,7 +96,7 @@ export const ChatProvider: React.FC = ({ children }) => {
         proximityMessages,
         directMessages,
         directID,
-        setDirectID
+        setDirectID,
       }}>
       {children}
     </ChatContext.Provider>
