@@ -204,7 +204,7 @@ export function conversationAreaCreateHandler(_requestData: ConversationAreaCrea
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-function townSocketAdapter(socket: Socket, socketsToPlayers: Map<string, string>): CoveyTownListener {
+function townSocketAdapter(socket: Socket, playerIdToSocketId: Map<string, string>): CoveyTownListener {
   return {
     onPlayerMoved(movedPlayer: Player) {
       socket.emit('playerMoved', movedPlayer);
@@ -234,7 +234,7 @@ function townSocketAdapter(socket: Socket, socketsToPlayers: Map<string, string>
         case ChatType.DIRECT: {
           const recipients = message.recipients;
           if(recipients && recipients.length === 1){
-            const toSocketId = socketsToPlayers.get(recipients[0])
+            const toSocketId = playerIdToSocketId.get(recipients[0])
             if(toSocketId)
               socket.to(toSocketId).emit('chatMessage', message);
           }
@@ -244,7 +244,7 @@ function townSocketAdapter(socket: Socket, socketsToPlayers: Map<string, string>
           const recipients = message.recipients;
           if(recipients && recipients.length > 1){
             recipients.forEach(recipient => {
-              const toSocketId = socketsToPlayers.get(recipient)
+              const toSocketId = playerIdToSocketId.get(recipient)
               if(toSocketId)
                 socket.to(toSocketId).emit('chatMessage', message);
             })
@@ -278,7 +278,7 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   // Create an adapter that will translate events from the CoveyTownController into
   // events that the socket protocol knows about
-  const listener = townSocketAdapter(socket, townController.socketsToPlayers);
+  const listener = townSocketAdapter(socket, townController.playerIdToSocketId);
   townController.addTownListener(listener);
 
   townController?.updateSocketMap(s.player.id, socket.id)

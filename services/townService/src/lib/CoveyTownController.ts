@@ -54,8 +54,8 @@ export default class CoveyTownController {
     return this._conversationAreas;
   }
 
-  get socketsToPlayers() {
-    return this._socketsToPlayers;
+  get playerIdToSocketId() {
+    return this._playerIdToSocketId;
   }
 
   /** The list of players currently in the town * */
@@ -83,7 +83,7 @@ export default class CoveyTownController {
 
   private _capacity: number;
 
-  private _socketsToPlayers: Map<string,string>;
+  private _playerIdToSocketId: Map<string,string>;
 
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
@@ -91,7 +91,7 @@ export default class CoveyTownController {
     this._townUpdatePassword = nanoid(24);
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
-    this._socketsToPlayers = new Map<string,string>();
+    this._playerIdToSocketId = new Map<string,string>();
   }
 
   /**
@@ -119,7 +119,7 @@ export default class CoveyTownController {
   }
 
   async updateSocketMap(playerId: string, socketId: string) {
-    this._socketsToPlayers.set(playerId, socketId);
+    this._playerIdToSocketId.set(playerId, socketId);
   }
 
   /**
@@ -129,6 +129,7 @@ export default class CoveyTownController {
    */
   destroySession(session: PlayerSession): void {
     this._players = this._players.filter(p => p.id !== session.player.id);
+    this._playerIdToSocketId.delete(session.player.id)
     this._sessions = this._sessions.filter(s => s.sessionToken !== session.sessionToken);
     this._listeners.forEach(listener => listener.onPlayerDisconnected(session.player));
     const conversation = session.player.activeConversationArea;
@@ -257,9 +258,7 @@ export default class CoveyTownController {
   }
 
   onChatMessage(message: ChatMessage): void {
-    console.log(message)
     this._listeners.forEach(listener => {
-      console.log(listener)
       listener.onChatMessage(message)
     });
   }
