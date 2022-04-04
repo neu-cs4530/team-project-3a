@@ -9,7 +9,7 @@ import AppStateProvider from '../../../state';
 
 export type ChatPlayerDropdownProps = {
     currentPlayerID: string,
-    setPlayerID: any
+    setPlayerID: (currentPlayerID: string) => void
 }
 
 

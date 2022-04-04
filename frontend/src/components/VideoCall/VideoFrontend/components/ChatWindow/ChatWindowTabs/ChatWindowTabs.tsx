@@ -1,8 +1,9 @@
 import { makeStyles, createStyles } from "@material-ui/core";
 import useChatContext from "../../../hooks/useChatContext/useChatContext";
 import CloseIcon from "../../../icons/CloseIcon";
+import { ChatType } from "../../../types";
 import ToggleChatButton from "../../Buttons/ToggleChatButton/ToggleChatButton";
-import ToggleChatTypeButton, { ChatType } from "../../Buttons/ToggleChatTypeButtons/ToggleChatTypeButtons";
+import ToggleChatTypeButton from "../../Buttons/ToggleChatTypeButtons/ToggleChatTypeButtons";
 
 const useStyles = makeStyles(() =>
   createStyles({

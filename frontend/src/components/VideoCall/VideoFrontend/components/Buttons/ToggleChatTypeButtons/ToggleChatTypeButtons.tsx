@@ -5,11 +5,9 @@ import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core';
 import useChatContext from '../../../hooks/useChatContext/useChatContext';
 import useVideoContext from '../../../hooks/useVideoContext/useVideoContext';
+import { ChatType } from '../../../types';
 
 
-export enum ChatType {
-  UNIVERSAL = 'Universal', PROXIMITY = 'Proximity', DIRECT = 'Direct'
-};
 
 type ToggleChatTypeButtonProps = {
   chatType: ChatType;
