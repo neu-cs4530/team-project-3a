@@ -1,10 +1,13 @@
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import React from 'react';
 import useChatContext from '../../hooks/useChatContext/useChatContext';
-import ChatInput from './ChatInput/ChatInput';
+import ChatWindowTabs from './ChatWindowTabs/ChatWindowTabs';
+import ChatPlayerDropdown from './ChatPlayerDropdown/ChatPlayerDropdown';
 import ChatWindowHeader from './ChatWindowHeader/ChatWindowHeader';
 import MessageList from './MessageList/MessageList';
+import ChatInput from './ChatInput/ChatInput';
+import { ChatType } from '../../types';
+import { useState } from 'react';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -40,12 +43,16 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ChatWindow() {
   const classes = useStyles();
-  const { isChatWindowOpen, messages, conversation, chatType } = useChatContext();
+  const { isChatWindowOpen, messages, proximityMessages, directMessages, conversation, chatType, directID, setDirectID } = useChatContext();
 
   return (
     <aside className={clsx(classes.chatWindowContainer, { [classes.hide]: !isChatWindowOpen })}>
       <ChatWindowHeader />
-      <MessageList messages={messages} />
+      <ChatWindowTabs />
+      {chatType === ChatType.DIRECT && <ChatPlayerDropdown currentPlayerID={directID} setPlayerID={setDirectID}/>}
+      {(chatType === ChatType.DIRECT && directID !== '') && <MessageList messages={directMessages[directID] ?? []} />}
+      {chatType === ChatType.PROXIMITY && <MessageList messages={proximityMessages} />}
+      {chatType === ChatType.UNIVERSAL && <MessageList messages={messages} />}
       <ChatInput
         conversation={conversation!}
         isChatWindowOpen={isChatWindowOpen}
