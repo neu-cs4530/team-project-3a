@@ -16,7 +16,7 @@ type ToggleChatTypeButtonProps = {
 };
 
 export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
-  const [chatType, setChatType] = useState(ChatType.DIRECT); //replace with custom hook useChatType()
+  const {chatType, setChatType} = useChatContext();
 
   const toggleChatType = () => {
     setChatType(props.chatType);
