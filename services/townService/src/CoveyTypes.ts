@@ -21,4 +21,4 @@ export enum ChatType {
   UNIVERSAL = 'Universal',
   PROXIMITY = 'Proximity',
   DIRECT = 'Direct',
-};
+}
