@@ -1,6 +1,7 @@
 .env
 createHandout.sh
 .env.prod
+.DS_Store
 
 # stryker temp files
 .stryker-tmp
