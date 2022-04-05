@@ -15,14 +15,14 @@ class GiphyHandler {
 
   public static async getGifsBySearchTerm(searchTerm: string) {
     const giphySearchURL = new URL(`${this._giphyURLBase}/gifs/search`);
-    const searchParams = { api_key: this._apiKey!, q: searchTerm, lang: 'en' };
+    const searchParams = { api_key: this._apiKey ?? '', q: searchTerm, lang: 'en' };
 
     giphySearchURL.search = new URLSearchParams(searchParams).toString();
 
     const data = await fetch(giphySearchURL.href);
 
     const result = await data.json();
-    console.log(result);
+
     return result;
   }
 }
