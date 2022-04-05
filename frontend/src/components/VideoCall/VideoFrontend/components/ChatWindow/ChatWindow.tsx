@@ -1,13 +1,12 @@
 import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
 import clsx from 'clsx';
 import useChatContext from '../../hooks/useChatContext/useChatContext';
-import ChatWindowTabs from './ChatWindowTabs/ChatWindowTabs';
+import { ChatType } from '../../types';
+import ChatInput from './ChatInput/ChatInput';
 import ChatPlayerDropdown from './ChatPlayerDropdown/ChatPlayerDropdown';
 import ChatWindowHeader from './ChatWindowHeader/ChatWindowHeader';
+import ChatWindowTabs from './ChatWindowTabs/ChatWindowTabs';
 import MessageList from './MessageList/MessageList';
-import ChatInput from './ChatInput/ChatInput';
-import { ChatType } from '../../types';
-import { useState } from 'react';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -43,20 +42,34 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function ChatWindow() {
   const classes = useStyles();
-  const { isChatWindowOpen, messages, proximityMessages, directMessages, conversation, chatType, directID, setDirectID } = useChatContext();
+  const {
+    isChatWindowOpen,
+    messages,
+    proximityMessages,
+    directMessages,
+    conversation,
+    chatType,
+    directID,
+    setDirectID,
+  } = useChatContext();
 
   return (
     <aside className={clsx(classes.chatWindowContainer, { [classes.hide]: !isChatWindowOpen })}>
       <ChatWindowHeader />
       <ChatWindowTabs />
-      {chatType === ChatType.DIRECT && <ChatPlayerDropdown currentPlayerID={directID} setPlayerID={setDirectID}/>}
-      {(chatType === ChatType.DIRECT && directID !== '') && <MessageList messages={directMessages[directID] ?? []} />}
+      {chatType === ChatType.DIRECT && (
+        <ChatPlayerDropdown currentPlayerID={directID} setPlayerID={setDirectID} />
+      )}
+      {chatType === ChatType.DIRECT && directID !== '' && (
+        <MessageList messages={directMessages[directID] ?? []} />
+      )}
       {chatType === ChatType.PROXIMITY && <MessageList messages={proximityMessages} />}
       {chatType === ChatType.UNIVERSAL && <MessageList messages={messages} />}
       <ChatInput
         conversation={conversation!}
         isChatWindowOpen={isChatWindowOpen}
         chatType={chatType}
+        directID={directID}
       />
     </aside>
   );

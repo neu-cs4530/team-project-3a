@@ -18,15 +18,18 @@ export default class TextConversation {
 
   private _authorName: string;
 
+  private _authorID: string;
+
   /**
    * Create a new Text Conversation
    *
    * @param socket socket to use to send/receive messages
    * @param authorName name of message author to use as sender
    */
-  public constructor(socket: Socket, authorName: string) {
+  public constructor(socket: Socket, authorName: string, authorID: string) {
     this._socket = socket;
     this._authorName = authorName;
+    this._authorID = authorID;
     this._socket.on('chatMessage', (message: ChatMessage) => {
       message.dateCreated = new Date(message.dateCreated);
 
@@ -61,13 +64,15 @@ export default class TextConversation {
    * Send a text message to this channel
    * @param message
    */
-  public sendMessage(chatType: ChatType, message: string) {
+  public sendMessage(chatType: ChatType, message: string, recipients?: string[]) {
     const msg: ChatMessage = {
       sid: nanoid(),
       chatType,
       body: message,
       author: this._authorName,
+      senderID: this._authorID,
       dateCreated: new Date(),
+      recipients,
     };
     this._socket.emit('chatMessage', msg);
   }
@@ -123,6 +128,7 @@ export default class TextConversation {
 type MessageCallback = (message: ChatMessage) => void;
 export type ChatMessage = {
   author: string;
+  senderID: string;
   chatType: ChatType;
   sid: string;
   body: string;
