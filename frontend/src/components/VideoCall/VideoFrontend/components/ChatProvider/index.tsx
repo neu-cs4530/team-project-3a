@@ -13,12 +13,14 @@ type ChatContextType = {
   proximityMessages: ChatMessage[];
   directMessages: { [playerID: string]: ChatMessage[] };
   conversation: TextConversation | null;
+  directID: string;
+  setDirectID: (directID: string) => void;
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
 
 export const ChatProvider: React.FC = ({ children }) => {
-  const { socket, userName } = useCoveyAppState();
+  const { socket, userName, myPlayerID } = useCoveyAppState();
   const isChatWindowOpenRef = useRef(false);
   const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
   const [conversation, setConversation] = useState<TextConversation | null>(null);
@@ -27,6 +29,7 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [directMessages, setDirectMessages] = useState<{ [playerID: string]: ChatMessage[] }>({});
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
+  const [directID, setDirectID] = useState('');
 
   useEffect(() => {
     if (conversation) {
@@ -36,20 +39,20 @@ export const ChatProvider: React.FC = ({ children }) => {
       const handleProximityMessageAdded = (message: ChatMessage) =>
         setProximityMessages(oldMessages => [...oldMessages, message]);
 
-      const handleDirectMessageAddded = (message: ChatMessage) =>
+      const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages({
           ...directMessages,
-          [message.author]: [...directMessages[message.author], message],
+          [message.senderID]: [...directMessages[message.senderID], message],
         });
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
       conversation.onMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
-      conversation.onMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
+      conversation.onMessageAdded(handleDirectMessageAdded, ChatType.DIRECT);
       conversation.onMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
 
       return () => {
         conversation.offMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
-        conversation.offMessageAdded(handleDirectMessageAddded, ChatType.DIRECT);
+        conversation.offMessageAdded(handleDirectMessageAdded, ChatType.DIRECT);
         conversation.offMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
       };
     }
@@ -72,7 +75,7 @@ export const ChatProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (socket) {
-      const conv = new TextConversation(socket, userName);
+      const conv = new TextConversation(socket, userName, myPlayerID);
       setConversation(conv);
       return () => {
         conv.close();
@@ -92,6 +95,8 @@ export const ChatProvider: React.FC = ({ children }) => {
         setChatType,
         proximityMessages,
         directMessages,
+        directID,
+        setDirectID,
       }}>
       {children}
     </ChatContext.Provider>
