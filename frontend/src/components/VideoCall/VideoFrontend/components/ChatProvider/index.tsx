@@ -41,12 +41,26 @@ export const ChatProvider: React.FC = ({ children }) => {
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
-          return {
-            ...oldDirectMessages,
-            [message.senderID]: oldDirectMessages[message.senderID]
-              ? [...oldDirectMessages[message.senderID], message]
-              : [message],
-          };
+          const recipient = message.recipients && message.recipients[0];
+          if (message.senderID === myPlayerID && recipient) {
+            console.log('in this thing');
+            console.log(recipient);
+            console.log(oldDirectMessages);
+            if (oldDirectMessages[recipient]) console.log(oldDirectMessages[recipient]);
+            return {
+              ...oldDirectMessages,
+              [recipient]: oldDirectMessages[recipient]
+                ? [...oldDirectMessages[recipient], message]
+                : [message],
+            };
+          } else {
+            return {
+              ...oldDirectMessages,
+              [message.senderID]: oldDirectMessages[message.senderID]
+                ? [...oldDirectMessages[message.senderID], message]
+                : [message],
+            };
+          }
         });
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
