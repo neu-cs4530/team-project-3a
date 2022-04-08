@@ -74,7 +74,6 @@ export default class TextConversation {
       dateCreated: new Date(),
       recipients,
     };
-    console.log('sent')
     this._socket.emit('chatMessage', msg);
   }
 
