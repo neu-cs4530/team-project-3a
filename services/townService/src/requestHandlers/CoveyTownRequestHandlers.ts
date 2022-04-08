@@ -264,7 +264,7 @@ function townSocketAdapter(
           if (recipients && recipients.length === 1) {
             const toSocketId = playerIdToSocketId.get(recipients[0]);
             const senderSocketId = playerIdToSocketId.get(message.senderID);
-            if (toSocketId && senderSocketId) {
+            if (toSocketId && senderSocketId && (senderSocketId === socket.id || toSocketId === socket.id)) {
               socket.to(toSocketId).emit('chatMessage', message);
               socket.to(senderSocketId).emit('chatMessage', message);
             }

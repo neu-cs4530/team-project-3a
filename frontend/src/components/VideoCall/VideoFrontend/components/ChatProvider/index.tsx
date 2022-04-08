@@ -43,10 +43,6 @@ export const ChatProvider: React.FC = ({ children }) => {
         setDirectMessages(oldDirectMessages => {
           const recipient = message.recipients && message.recipients[0];
           if (message.senderID === myPlayerID && recipient) {
-            console.log('in this thing');
-            console.log(recipient);
-            console.log(oldDirectMessages);
-            if (oldDirectMessages[recipient]) console.log(oldDirectMessages[recipient]);
             return {
               ...oldDirectMessages,
               [recipient]: oldDirectMessages[recipient]
