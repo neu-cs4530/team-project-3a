@@ -3,6 +3,12 @@ class GiphyHandler {
 
   private static _giphyURLBase = 'https://api.giphy.com/v1';
 
+  /**
+   * This method provides functionality to search for GIFs from GIPHY.
+   *
+   * @param searchTerm the search term to search the string by
+   * @returns an array of objects containing search results from GIPHY
+   */
   public static async getGifsBySearchTerm(searchTerm: string) {
     const giphySearchURL = new URL(`${this._giphyURLBase}/gifs/search`);
     const searchParams = { api_key: this._apiKey ?? '', q: searchTerm, lang: 'en' };
