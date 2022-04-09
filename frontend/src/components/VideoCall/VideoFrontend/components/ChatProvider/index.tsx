@@ -40,9 +40,23 @@ export const ChatProvider: React.FC = ({ children }) => {
         setProximityMessages(oldMessages => [...oldMessages, message]);
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
-        setDirectMessages({
-          ...directMessages,
-          [message.senderID]: [...directMessages[message.senderID], message],
+        setDirectMessages(oldDirectMessages => {
+          const recipient = message.recipients && message.recipients[0];
+          if (message.senderID === myPlayerID && recipient) {
+            return {
+              ...oldDirectMessages,
+              [recipient]: oldDirectMessages[recipient]
+                ? [...oldDirectMessages[recipient], message]
+                : [message],
+            };
+          } else {
+            return {
+              ...oldDirectMessages,
+              [message.senderID]: oldDirectMessages[message.senderID]
+                ? [...oldDirectMessages[message.senderID], message]
+                : [message],
+            };
+          }
         });
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
