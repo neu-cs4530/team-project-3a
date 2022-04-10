@@ -1,3 +1,4 @@
+import DebugLogger from '../DebugLogger';
 import { GiphySearchResult } from './GiphyHandlerTypes';
 
 /**
@@ -7,6 +8,8 @@ class GiphyHandler {
   private static _apiKey = process.env.REACT_APP_GIPHY_API_KEY;
 
   private static _giphyURLBase = 'https://api.giphy.com/v1';
+
+  private static logger: DebugLogger = new DebugLogger('GiphyHandler');
 
   /**
    * This method provides functionality to search for GIFs from GIPHY.
@@ -34,7 +37,8 @@ class GiphyHandler {
       const result = (await data.json()) as GiphySearchResult;
       const isValid = GiphyHandler.validateSearchResult(result);
       return isValid ? result : null;
-    } catch {
+    } catch (err) {
+      this.logger.error('Error retrieving data from GIPHY API: ', err);
       return null;
     }
   }
