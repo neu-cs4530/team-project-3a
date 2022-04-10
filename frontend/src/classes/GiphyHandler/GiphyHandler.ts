@@ -14,7 +14,10 @@ class GiphyHandler {
    * @param searchTerm the search term to search the string by
    * @returns an array of objects containing search results from GIPHY
    */
-  public static async getGifsBySearchTerm(searchTerm: string, offset?: number) {
+  public static async getGifsBySearchTerm(
+    searchTerm: string,
+    offset?: number,
+  ): Promise<GiphySearchResult | null> {
     const giphySearchURL = new URL(`${this._giphyURLBase}/gifs/search`);
     const searchParams = {
       api_key: this._apiKey ?? '',
