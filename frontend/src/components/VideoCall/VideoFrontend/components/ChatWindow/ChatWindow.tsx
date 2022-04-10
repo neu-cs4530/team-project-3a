@@ -60,8 +60,10 @@ export default function ChatWindow() {
       {chatType === ChatType.DIRECT && (
         <ChatPlayerDropdown currentPlayerID={directID} setPlayerID={setDirectID} />
       )}
-      {chatType === ChatType.DIRECT && directID !== '' && (
-        <MessageList messages={directMessages[directID] ?? []} />
+      {chatType === ChatType.DIRECT && 
+      (directID !== '' 
+        ? <MessageList messages={[]} /> 
+        : (<MessageList messages={directMessages[directID] ?? []} />)
       )}
       {chatType === ChatType.PROXIMITY && <MessageList messages={proximityMessages} />}
       {chatType === ChatType.UNIVERSAL && <MessageList messages={messages} />}
