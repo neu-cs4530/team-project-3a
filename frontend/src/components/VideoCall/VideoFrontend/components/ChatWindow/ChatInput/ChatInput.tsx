@@ -63,12 +63,18 @@ interface ChatInputProps {
   conversation: TextConversation;
   isChatWindowOpen: boolean;
   chatType: ChatType;
+  directID: string;
 }
 
 const ALLOWED_FILE_TYPES =
   'audio/*, image/*, text/*, video/*, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document .xslx, .ppt, .pdf, .key, .svg, .csv';
 
-export default function ChatInput({ conversation, isChatWindowOpen, chatType }: ChatInputProps) {
+export default function ChatInput({
+  conversation,
+  isChatWindowOpen,
+  chatType,
+  directID,
+}: ChatInputProps) {
   const classes = useStyles();
   const [messageBody, setMessageBody] = useState('');
   const [isSendingFile, setIsSendingFile] = useState(false);
@@ -108,7 +114,15 @@ export default function ChatInput({ conversation, isChatWindowOpen, chatType }: 
 
   const handleSendMessage = (message: string) => {
     if (isValidMessage) {
-      conversation.sendMessage(chatType, message.trim());
+      let recipients: string[] = [];
+      if (chatType === ChatType.DIRECT) {
+        recipients.push(directID);
+      }
+      if (chatType === ChatType.PROXIMITY) {
+        // TODO
+      }
+
+      conversation.sendMessage(chatType, message.trim(), recipients);
       setMessageBody('');
     }
   };
