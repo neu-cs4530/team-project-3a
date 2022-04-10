@@ -15,6 +15,7 @@ type ChatContextType = {
   conversation: TextConversation | null;
   directID: string;
   setDirectID: (directID: string) => void;
+  newestMessage: ChatMessage | null;
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
@@ -30,20 +31,24 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
   const [directID, setDirectID] = useState('');
+  const [newestMessage, setNewestMessage] = useState<ChatMessage | null>(null);
 
   useEffect(() => {
     if (conversation) {
       const handleMessageAdded = (message: ChatMessage) =>
-        setMessages(oldMessages => [...oldMessages, message]);
+        {setMessages(oldMessages => [...oldMessages, message]);
+          setNewestMessage(message);};
 
       const handleProximityMessageAdded = (message: ChatMessage) =>
-        setProximityMessages(oldMessages => [...oldMessages, message]);
+        {setProximityMessages(oldMessages => [...oldMessages, message]);
+          setNewestMessage(message);};
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
-        setDirectMessages({
+        {setDirectMessages({
           ...directMessages,
           [message.senderID]: [...directMessages[message.senderID], message],
-        });
+        })
+          setNewestMessage(message);}
       //TODO - store entire message queue on server?
       // conversation.getMessages().then(newMessages => setMessages(newMessages.items));
       conversation.onMessageAdded(handleMessageAdded, ChatType.UNIVERSAL);
@@ -97,6 +102,7 @@ export const ChatProvider: React.FC = ({ children }) => {
         directMessages,
         directID,
         setDirectID,
+        newestMessage,
       }}>
       {children}
     </ChatContext.Provider>
