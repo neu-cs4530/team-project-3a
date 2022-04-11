@@ -15,6 +15,7 @@ type ChatContextType = {
   conversation: TextConversation | null;
   directID: string;
   setDirectID: (directID: string) => void;
+  newestMessage: ChatMessage | null;
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
@@ -30,17 +31,21 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
   const [directID, setDirectID] = useState('');
+  const [newestMessage, setNewestMessage] = useState<ChatMessage | null>(null);
 
   useEffect(() => {
     if (conversation) {
       const handleMessageAdded = (message: ChatMessage) =>
-        setMessages(oldMessages => [...oldMessages, message]);
+        {setMessages(oldMessages => [...oldMessages, message]);
+          setNewestMessage(message);};
 
       const handleProximityMessageAdded = (message: ChatMessage) =>
-        setProximityMessages(oldMessages => [...oldMessages, message]);
+        {setProximityMessages(oldMessages => [...oldMessages, message]);
+          setNewestMessage(message);};
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
+          setNewestMessage(message);
           const recipient = message.recipients && message.recipients[0];
           if (message.senderID === myPlayerID && recipient) {
             return {
@@ -111,6 +116,7 @@ export const ChatProvider: React.FC = ({ children }) => {
         directMessages,
         directID,
         setDirectID,
+        newestMessage,
       }}>
       {children}
     </ChatContext.Provider>

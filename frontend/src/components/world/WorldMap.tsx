@@ -3,12 +3,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import BoundingBox from '../../classes/BoundingBox';
 import ConversationArea from '../../classes/ConversationArea';
 import Player, { ServerPlayer, UserLocation } from '../../classes/Player';
+import { ChatMessage } from '../../classes/TextConversation';
 import Video from '../../classes/Video/Video';
 import useConversationAreas from '../../hooks/useConversationAreas';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import usePlayerMovement from '../../hooks/usePlayerMovement';
 import usePlayersInTown from '../../hooks/usePlayersInTown';
 import SocialSidebar from '../SocialSidebar/SocialSidebar';
+import useChatContext from '../VideoCall/VideoFrontend/hooks/useChatContext/useChatContext';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
 
@@ -27,6 +29,7 @@ class CoveyGameScene extends Phaser.Scene {
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     label: Phaser.GameObjects.Text;
+    chatBubble: Phaser.GameObjects.Text;
   };
 
   private myPlayerID: string;
@@ -61,6 +64,8 @@ class CoveyGameScene extends Phaser.Scene {
   private setNewConversation: (conv: ConversationArea) => void;
 
   private _onGameReadyListeners: Callback[] = [];
+
+  private messages: ChatMessage[] = [];
 
   constructor(
     video: Video,
@@ -195,14 +200,31 @@ class CoveyGameScene extends Phaser.Scene {
           color: '#000000',
           backgroundColor: '#ffffff',
         });
+        const chatBubble = this.add.text(0, 0,  '', {
+          font: '18px monospace',
+          color: '#000000',
+          backgroundColor: '#ffffff',
+        });
+        const playerMessage = this.messages.find(message => myPlayer && (message.sid === myPlayer.id));
+        if (playerMessage) {
+          chatBubble.text = playerMessage.body;
+        }
+        else {
+          chatBubble.setVisible(false);
+        }
         myPlayer.label = label;
         myPlayer.sprite = sprite;
+        myPlayer.chatBubble = chatBubble;
       }
       if (!sprite.anims) return;
       sprite.setX(player.location.x);
       sprite.setY(player.location.y);
       myPlayer.label?.setX(player.location.x);
       myPlayer.label?.setY(player.location.y - 20);
+      myPlayer.chatBubble?.setX(player.location.x);
+      myPlayer.chatBubble?.setY(player.location.y + 20);
+
+      
       if (player.location.moving) {
         sprite.anims.play(`misa-${player.location.rotation}-walk`, true);
       } else {
@@ -210,6 +232,28 @@ class CoveyGameScene extends Phaser.Scene {
         sprite.setTexture('atlas', `misa-${player.location.rotation}`);
       }
     }
+  }
+
+  updatePlayerMessages(newMessage: ChatMessage | null) {
+    if (newMessage === null) {
+      return;
+    }
+    if (newMessage.senderID === this.myPlayerID) {
+      this.player?.chatBubble.setText(newMessage.body);    
+      this.player?.chatBubble.setVisible(true);
+      this.messages = this.messages.filter(m => m.senderID === this.myPlayerID);
+      this.messages.push(newMessage);
+      
+    }
+    else {
+      const messagePlayer = this.players.find(p => p.id === newMessage.senderID);
+      if (messagePlayer) {
+        messagePlayer.chatBubble?.setText(newMessage.body);
+        messagePlayer.chatBubble?.setVisible(true);
+        this.messages = this.messages.filter(m => m.senderID === messagePlayer.id);
+      }
+    }
+
   }
 
   getNewMovementDirection() {
@@ -279,6 +323,8 @@ class CoveyGameScene extends Phaser.Scene {
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
       this.player.label.setY(body.y - 20);
+      this.player.chatBubble.setX(body.x);
+      this.player.chatBubble.setY(body.y + 20);
       if (
         !this.lastLocation ||
         this.lastLocation.x !== body.x ||
@@ -473,9 +519,17 @@ class CoveyGameScene extends Phaser.Scene {
       // padding: {x: 20, y: 10},
       backgroundColor: '#ffffff',
     });
+    const chatBubble = this.add.text(spawnPoint.x, spawnPoint.y + 20, '', {
+      font: '18px monospace',
+      color: '#000000',
+      // padding: {x: 20, y: 10},
+      backgroundColor: '#ffffff',
+    });
+    chatBubble.setVisible(false);
     this.player = {
       sprite,
       label,
+      chatBubble
     };
 
     /* Configure physics overlap behavior for when the player steps into
@@ -661,6 +715,7 @@ export default function WorldMap(): JSX.Element {
   const [newConversation, setNewConversation] = useState<ConversationArea>();
   const playerMovementCallbacks = usePlayerMovement();
   const players = usePlayersInTown();
+  const { newestMessage } = useChatContext();
 
   useEffect(() => {
     const config = {
@@ -711,6 +766,10 @@ export default function WorldMap(): JSX.Element {
   useEffect(() => {
     gameScene?.updatePlayersLocations(players);
   }, [gameScene, players]);
+
+  useEffect(() => {
+    gameScene?.updatePlayerMessages(newestMessage);
+  }, [gameScene, newestMessage]);
 
   useEffect(() => {
     gameScene?.updateConversationAreas(conversationAreas);
