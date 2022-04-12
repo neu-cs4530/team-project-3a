@@ -113,6 +113,12 @@ export default function ChatInput({
     }
   };
 
+  const handleSendGif = async (searchTerm: string, recipients: string[]) => {
+    const result = await GiphyHandler.getRandomGif(searchTerm);
+    const gifURL = result?.data?.images?.downsized?.url;
+    if (gifURL) conversation.sendMessage(chatType, gifURL, true, recipients);
+  };
+
   const handleSendMessage = (message: string) => {
     if (isValidMessage) {
       let recipients: string[] = [];
@@ -123,20 +129,19 @@ export default function ChatInput({
         // TODO
       }
 
-      if (message.charAt(0) === '/' && message.includes('/giphy')) {
-        handleSendGif(message.substring(6), recipients);
-        setMessageBody('');
-      } else {
-        conversation.sendMessage(chatType, message.trim(), false, recipients);
-        setMessageBody('');
-      }
-    }
-  };
+      const command = message.charAt(0) === '/' ? message.split(' ')[0] : '';
 
-  const handleSendGif = async (searchTerm: string, recipients: string[]) => {
-    const result = await GiphyHandler.getRandomGif(searchTerm);
-    const gifURL = result?.data?.images?.downsized?.url;
-    if (gifURL) conversation.sendMessage(chatType, gifURL, true, recipients);
+      switch (command) {
+        case '/giphy': {
+          handleSendGif(message.substring('/giphy'.length), recipients);
+          break;
+        }
+        default: {
+          conversation.sendMessage(chatType, message.trim(), false, recipients);
+        }
+      }
+      setMessageBody('');
+    }
   };
 
   return (
