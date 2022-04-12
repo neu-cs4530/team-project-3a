@@ -16,6 +16,14 @@ export interface GIFData {
   is_sticker: number;
   import_datetime: string;
   trending_datetime: string;
+  images: { downsized: GifImage };
+}
+
+export interface GifImage {
+  height: number;
+  width: number;
+  size: number;
+  url: string;
 }
 
 export interface GiphyPagination {
@@ -33,5 +41,10 @@ export interface GiphyMetaData {
 export interface GiphySearchResult {
   data: GIFData[] | null;
   pagination: GiphyPagination;
+  meta: GiphyMetaData;
+}
+
+export interface GiphyRandomResult {
+  data: GIFData | null;
   meta: GiphyMetaData;
 }
