@@ -2,6 +2,7 @@ import { makeStyles } from '@material-ui/core';
 import TextareaAutosize from '@material-ui/core/TextareaAutosize';
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
+import GiphyHandler from '../../../../../../classes/GiphyHandler/GiphyHandler';
 import TextConversation from '../../../../../../classes/TextConversation';
 import useMaybeVideo from '../../../../../../hooks/useMaybeVideo';
 import { ChatType } from '../../../types';
@@ -112,6 +113,12 @@ export default function ChatInput({
     }
   };
 
+  const handleSendGif = async (searchTerm: string, recipients: string[]) => {
+    const result = await GiphyHandler.getRandomGif(searchTerm);
+    const gifURL = result?.data?.images?.downsized?.url;
+    if (gifURL) conversation.sendMessage(chatType, gifURL, true, recipients);
+  };
+
   const handleSendMessage = (message: string) => {
     if (isValidMessage) {
       let recipients: string[] = [];
@@ -122,7 +129,17 @@ export default function ChatInput({
         // TODO
       }
 
-      conversation.sendMessage(chatType, message.trim(), recipients);
+      const command = message.charAt(0) === '/' ? message.split(' ')[0] : '';
+
+      switch (command) {
+        case '/giphy': {
+          handleSendGif(message.substring('/giphy'.length), recipients);
+          break;
+        }
+        default: {
+          conversation.sendMessage(chatType, message.trim(), false, recipients);
+        }
+      }
       setMessageBody('');
     }
   };

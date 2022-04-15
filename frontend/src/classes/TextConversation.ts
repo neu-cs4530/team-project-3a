@@ -64,7 +64,7 @@ export default class TextConversation {
    * Send a text message to this channel
    * @param message
    */
-  public sendMessage(chatType: ChatType, message: string, recipients?: string[]) {
+  public sendMessage(chatType: ChatType, message: string, isGif: boolean, recipients?: string[]) {
     const msg: ChatMessage = {
       sid: nanoid(),
       chatType,
@@ -72,6 +72,7 @@ export default class TextConversation {
       author: this._authorName,
       senderID: this._authorID,
       dateCreated: new Date(),
+      isGif,
       recipients,
     };
     this._socket.emit('chatMessage', msg);
@@ -133,5 +134,6 @@ export type ChatMessage = {
   sid: string;
   body: string;
   dateCreated: Date;
+  isGif: boolean;
   recipients?: string[];
 };
