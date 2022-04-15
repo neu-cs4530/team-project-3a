@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import GiphyHandler from '../../../../../../classes/GiphyHandler/GiphyHandler';
 import TextConversation from '../../../../../../classes/TextConversation';
 import useMaybeVideo from '../../../../../../hooks/useMaybeVideo';
+import useNearbyPlayers from '../../../../../../hooks/useNearbyPlayers';
 import { ChatType } from '../../../types';
 import { isMobile } from '../../../utils';
 import Snackbar from '../../Snackbar/Snackbar';
@@ -84,6 +85,7 @@ export default function ChatInput({
   const textInputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isTextareaFocused, setIsTextareaFocused] = useState(false);
+  const nearbyPlayers = useNearbyPlayers();
   const video = useMaybeVideo();
 
   useEffect(() => {
@@ -126,7 +128,7 @@ export default function ChatInput({
         recipients.push(directID);
       }
       if (chatType === ChatType.PROXIMITY) {
-        // TODO
+        nearbyPlayers.forEach(player => recipients.push(player.id));
       }
 
       const command = message.charAt(0) === '/' ? message.split(' ')[0] : '';
