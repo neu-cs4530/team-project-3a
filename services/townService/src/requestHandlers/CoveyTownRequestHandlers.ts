@@ -273,10 +273,13 @@ function townSocketAdapter(
         }
         case ChatType.PROXIMITY: {
           const { recipients } = message;
-          if (recipients && recipients.length > 1) {
+          if (recipients && recipients.length >= 1) {
             recipients.forEach(recipient => {
               const toSocketId = playerIdToSocketId.get(recipient);
-              if (toSocketId) socket.to(toSocketId).emit('chatMessage', message);
+              const senderSocketId = playerIdToSocketId.get(message.senderID);
+              if (toSocketId && senderSocketId && (senderSocketId === socket.id || toSocketId === socket.id)){
+                socket.to(toSocketId).emit('chatMessage', message);
+              } 
             });
           }
           break;
