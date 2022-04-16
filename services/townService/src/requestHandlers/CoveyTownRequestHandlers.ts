@@ -260,39 +260,30 @@ function townSocketAdapter(
           break;
         }
         case ChatType.DIRECT: {
-          const { recipients } = message;
+          const { senderID, recipients } = message;
+          if (playerIdToSocketId.get(senderID) === socket.id) {
+            socket.emit('chatMessage', message);
+          }
           if (recipients && recipients.length === 1) {
             const toSocketId = playerIdToSocketId.get(recipients[0]);
-            const senderSocketId = playerIdToSocketId.get(message.senderID);
-            if (
-              toSocketId &&
-              senderSocketId &&
-              (senderSocketId === socket.id || toSocketId === socket.id)
-            ) {
-              socket.to(toSocketId).emit('chatMessage', message);
-              socket.to(senderSocketId).emit('chatMessage', message);
+            if (toSocketId === socket.id) {
+              socket.emit('chatMessage', message);
             }
           }
           break;
         }
         case ChatType.PROXIMITY: {
-          const { recipients } = message;
-          const senderSocketId = playerIdToSocketId.get(message.senderID);
-          if (senderSocketId && socket.id === senderSocketId) {
-            socket.to(senderSocketId).emit('chatMessage', message);
+          const { senderID, recipients } = message;
+          if (playerIdToSocketId.get(senderID) === socket.id) {
+            socket.emit('chatMessage', message);
           }
-          if (recipients) {
-            recipients.forEach(recipient => {
-              const toSocketId = playerIdToSocketId.get(recipient);
-              if (
-                toSocketId &&
-                senderSocketId &&
-                (senderSocketId === socket.id || toSocketId === socket.id)
-              ) {
-                socket.to(toSocketId).emit('chatMessage', message);
-              }
-            });
-          }
+          recipients?.every(playerID => {
+            if (playerIdToSocketId.get(playerID) === socket.id) {
+              socket.emit('chatMessage', message);
+              return false;
+            }
+            return true;
+          });
           break;
         }
         default: {
