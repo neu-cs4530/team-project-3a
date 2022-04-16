@@ -264,7 +264,11 @@ function townSocketAdapter(
           if (recipients && recipients.length === 1) {
             const toSocketId = playerIdToSocketId.get(recipients[0]);
             const senderSocketId = playerIdToSocketId.get(message.senderID);
-            if (toSocketId && senderSocketId && (senderSocketId === socket.id || toSocketId === socket.id)) {
+            if (
+              toSocketId &&
+              senderSocketId &&
+              (senderSocketId === socket.id || toSocketId === socket.id)
+            ) {
               socket.to(toSocketId).emit('chatMessage', message);
               socket.to(senderSocketId).emit('chatMessage', message);
             }
@@ -273,13 +277,22 @@ function townSocketAdapter(
         }
         case ChatType.PROXIMITY: {
           const { recipients } = message;
-          if (recipients && recipients.length >= 1) {
+          const senderSocketId = playerIdToSocketId.get(message.senderID);
+          console.log(senderSocketId);
+          if (senderSocketId) {
+            console.log('in here');
+            socket.to(senderSocketId).emit('chatMessage', message);
+          }
+          if (recipients) {
             recipients.forEach(recipient => {
               const toSocketId = playerIdToSocketId.get(recipient);
-              const senderSocketId = playerIdToSocketId.get(message.senderID);
-              if (toSocketId && senderSocketId && (senderSocketId === socket.id || toSocketId === socket.id)){
+              if (
+                toSocketId &&
+                senderSocketId &&
+                (senderSocketId === socket.id || toSocketId === socket.id)
+              ) {
                 socket.to(toSocketId).emit('chatMessage', message);
-              } 
+              }
             });
           }
           break;
