@@ -278,9 +278,7 @@ function townSocketAdapter(
         case ChatType.PROXIMITY: {
           const { recipients } = message;
           const senderSocketId = playerIdToSocketId.get(message.senderID);
-          console.log(senderSocketId);
-          if (senderSocketId) {
-            console.log('in here');
+          if (senderSocketId && socket.id === senderSocketId) {
             socket.to(senderSocketId).emit('chatMessage', message);
           }
           if (recipients) {
