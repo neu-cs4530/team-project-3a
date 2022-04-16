@@ -263,6 +263,7 @@ function townSocketAdapter(
           const { senderID, recipients } = message;
           if (playerIdToSocketId.get(senderID) === socket.id) {
             socket.emit('chatMessage', message);
+            return;
           }
           if (recipients && recipients.length === 1) {
             const toSocketId = playerIdToSocketId.get(recipients[0]);
@@ -276,6 +277,7 @@ function townSocketAdapter(
           const { senderID, recipients } = message;
           if (playerIdToSocketId.get(senderID) === socket.id) {
             socket.emit('chatMessage', message);
+            return;
           }
           recipients?.every(playerID => {
             if (playerIdToSocketId.get(playerID) === socket.id) {
