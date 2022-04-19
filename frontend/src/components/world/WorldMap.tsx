@@ -13,6 +13,7 @@ import SocialSidebar from '../SocialSidebar/SocialSidebar';
 import useChatContext from '../VideoCall/VideoFrontend/hooks/useChatContext/useChatContext';
 import { Callback } from '../VideoCall/VideoFrontend/types';
 import NewConversationModal from './NewCoversationModal';
+import ChatBubble from './PhaserObjects/ChatBubble';
 
 // Original inspiration and code from:
 // https://medium.com/@michaelwesthadley/modular-game-worlds-in-phaser-3-tilemaps-1-958fc7e6bbd6
@@ -29,7 +30,7 @@ class CoveyGameScene extends Phaser.Scene {
   private player?: {
     sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
     label: Phaser.GameObjects.Text;
-    chatBubble: Phaser.GameObjects.Text;
+    chatBubble: ChatBubble;
   };
 
   private myPlayerID: string;
@@ -63,9 +64,7 @@ class CoveyGameScene extends Phaser.Scene {
 
   private setNewConversation: (conv: ConversationArea) => void;
 
-  private _onGameReadyListeners: Callback[] = [];
-
-  private messages: ChatMessage[] = [];
+  private _onGameReadyListeners: Callback[] = [];  
 
   constructor(
     video: Video,
@@ -79,6 +78,7 @@ class CoveyGameScene extends Phaser.Scene {
     this.myPlayerID = myPlayerID;
     this.setNewConversation = setNewConversation;
   }
+
 
   preload() {
     // this.load.image("logo", logoImg);
@@ -200,18 +200,7 @@ class CoveyGameScene extends Phaser.Scene {
           color: '#000000',
           backgroundColor: '#ffffff',
         });
-        const chatBubble = this.add.text(0, 0,  '', {
-          font: '18px monospace',
-          color: '#000000',
-          backgroundColor: '#ffffff',
-        });
-        const playerMessage = this.messages.find(message => myPlayer && (message.sid === myPlayer.id));
-        if (playerMessage) {
-          chatBubble.text = playerMessage.body;
-        }
-        else {
-          chatBubble.setVisible(false);
-        }
+        const chatBubble = new ChatBubble(this, 0, 0);
         myPlayer.label = label;
         myPlayer.sprite = sprite;
         myPlayer.chatBubble = chatBubble;
@@ -220,9 +209,9 @@ class CoveyGameScene extends Phaser.Scene {
       sprite.setX(player.location.x);
       sprite.setY(player.location.y);
       myPlayer.label?.setX(player.location.x);
-      myPlayer.label?.setY(player.location.y - 20);
+      myPlayer.label?.setY(player.location.y + 30);
       myPlayer.chatBubble?.setX(player.location.x);
-      myPlayer.chatBubble?.setY(player.location.y + 20);
+      myPlayer.chatBubble?.setY(player.location.y - 20);
 
       
       if (player.location.moving) {
@@ -239,18 +228,12 @@ class CoveyGameScene extends Phaser.Scene {
       return;
     }
     if (newMessage.senderID === this.myPlayerID) {
-      this.player?.chatBubble.setText(newMessage.body);    
-      this.player?.chatBubble.setVisible(true);
-      this.messages = this.messages.filter(m => m.senderID === this.myPlayerID);
-      this.messages.push(newMessage);
-      
+      this.player?.chatBubble.setMessage(newMessage);
     }
     else {
       const messagePlayer = this.players.find(p => p.id === newMessage.senderID);
       if (messagePlayer) {
-        messagePlayer.chatBubble?.setText(newMessage.body);
-        messagePlayer.chatBubble?.setVisible(true);
-        this.messages = this.messages.filter(m => m.senderID === messagePlayer.id);
+        messagePlayer.chatBubble?.setMessage(newMessage);
       }
     }
 
@@ -322,9 +305,9 @@ class CoveyGameScene extends Phaser.Scene {
 
       const isMoving = primaryDirection !== undefined;
       this.player.label.setX(body.x);
-      this.player.label.setY(body.y - 20);
+      this.player.label.setY(body.y + 30);
       this.player.chatBubble.setX(body.x);
-      this.player.chatBubble.setY(body.y + 20);
+      this.player.chatBubble.setY(body.y - 20);
       if (
         !this.lastLocation ||
         this.lastLocation.x !== body.x ||
@@ -513,19 +496,13 @@ class CoveyGameScene extends Phaser.Scene {
       .sprite(spawnPoint.x, spawnPoint.y, 'atlas', 'misa-front')
       .setSize(30, 40)
       .setOffset(0, 24);
-    const label = this.add.text(spawnPoint.x, spawnPoint.y - 20, '(You)', {
+    const label = this.add.text(spawnPoint.x, spawnPoint.y + 30, '(You)', {
       font: '18px monospace',
       color: '#000000',
       // padding: {x: 20, y: 10},
       backgroundColor: '#ffffff',
     });
-    const chatBubble = this.add.text(spawnPoint.x, spawnPoint.y + 20, '', {
-      font: '18px monospace',
-      color: '#000000',
-      // padding: {x: 20, y: 10},
-      backgroundColor: '#ffffff',
-    });
-    chatBubble.setVisible(false);
+    const chatBubble = new ChatBubble(this, spawnPoint.x, spawnPoint.y - 20);
     this.player = {
       sprite,
       label,
