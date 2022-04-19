@@ -261,13 +261,10 @@ function townSocketAdapter(
         }
         case ChatType.DIRECT: {
           const { senderID, recipients } = message;
-          if (playerIdToSocketId.get(senderID) === socket.id) {
-            socket.emit('chatMessage', message);
-            return;
-          }
           if (recipients && recipients.length === 1) {
             const toSocketId = playerIdToSocketId.get(recipients[0]);
-            if (toSocketId === socket.id) {
+            const senderSocketId = playerIdToSocketId.get(senderID);
+            if (toSocketId === socket.id || senderSocketId === socket.id) {
               socket.emit('chatMessage', message);
             }
           }
