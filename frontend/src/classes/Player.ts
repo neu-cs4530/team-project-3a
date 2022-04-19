@@ -1,3 +1,5 @@
+import ChatBubble from "../components/world/PhaserObjects/ChatBubble";
+
 export default class Player {
   public location?: UserLocation;
 
@@ -9,7 +11,7 @@ export default class Player {
 
   public label?: Phaser.GameObjects.Text;
 
-  public chatBubble?: Phaser.GameObjects.Text;
+  public chatBubble?: ChatBubble;
 
   constructor(id: string, userName: string, location: UserLocation) {
     this._id = id;
