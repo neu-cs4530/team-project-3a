@@ -260,28 +260,29 @@ function townSocketAdapter(
           break;
         }
         case ChatType.DIRECT: {
-          const { recipients } = message;
+          const { senderID, recipients } = message;
           if (recipients && recipients.length === 1) {
             const toSocketId = playerIdToSocketId.get(recipients[0]);
-            const senderSocketId = playerIdToSocketId.get(message.senderID);
-            if (toSocketId && senderSocketId && (senderSocketId === socket.id || toSocketId === socket.id)) {
-              socket.to(toSocketId).emit('chatMessage', message);
-              socket.to(senderSocketId).emit('chatMessage', message);
+            const senderSocketId = playerIdToSocketId.get(senderID);
+            if (toSocketId === socket.id || senderSocketId === socket.id) {
+              socket.emit('chatMessage', message);
             }
           }
           break;
         }
         case ChatType.PROXIMITY: {
-          const { recipients } = message;
-          if (recipients && recipients.length >= 1) {
-            recipients.forEach(recipient => {
-              const toSocketId = playerIdToSocketId.get(recipient);
-              const senderSocketId = playerIdToSocketId.get(message.senderID);
-              if (toSocketId && senderSocketId && (senderSocketId === socket.id || toSocketId === socket.id)){
-                socket.to(toSocketId).emit('chatMessage', message);
-              } 
-            });
+          const { senderID, recipients } = message;
+          if (playerIdToSocketId.get(senderID) === socket.id) {
+            socket.emit('chatMessage', message);
+            return;
           }
+          recipients?.every(playerID => {
+            if (playerIdToSocketId.get(playerID) === socket.id) {
+              socket.emit('chatMessage', message);
+              return false;
+            }
+            return true;
+          });
           break;
         }
         default: {
