@@ -177,6 +177,7 @@ export default function ChatInput({
           ref={textInputRef}
           onFocus={() => setIsTextareaFocused(true)}
           onBlur={() => setIsTextareaFocused(false)}
+          data-testid='chat-input'
         />
       </div>
     </div>

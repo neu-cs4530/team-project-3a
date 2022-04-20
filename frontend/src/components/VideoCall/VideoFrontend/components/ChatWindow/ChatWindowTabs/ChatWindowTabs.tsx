@@ -1,9 +1,6 @@
-import { makeStyles, createStyles } from "@material-ui/core";
-import useChatContext from "../../../hooks/useChatContext/useChatContext";
-import CloseIcon from "../../../icons/CloseIcon";
-import { ChatType } from "../../../types";
-import ToggleChatButton from "../../Buttons/ToggleChatButton/ToggleChatButton";
-import ToggleChatTypeButton from "../../Buttons/ToggleChatTypeButtons/ToggleChatTypeButtons";
+import { createStyles, makeStyles } from '@material-ui/core';
+import { ChatType } from '../../../types';
+import ToggleChatTypeButton from '../../Buttons/ToggleChatTypeButtons/ToggleChatTypeButtons';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -26,17 +23,17 @@ const useStyles = makeStyles(() =>
       border: '0',
       padding: '0.4em',
     },
-  })
+  }),
 );
 
 export default function ChatWindowTabs() {
-    const classes = useStyles();
+  const classes = useStyles();
 
-    return (
-      <div className={classes.container}>
-        <ToggleChatTypeButton chatType={ChatType.UNIVERSAL}></ToggleChatTypeButton>
-        <ToggleChatTypeButton chatType={ChatType.PROXIMITY}></ToggleChatTypeButton>
-        <ToggleChatTypeButton chatType={ChatType.DIRECT}></ToggleChatTypeButton>
-      </div>
-    );
+  return (
+    <div className={classes.container}>
+      <ToggleChatTypeButton chatType={ChatType.UNIVERSAL}></ToggleChatTypeButton>
+      <ToggleChatTypeButton chatType={ChatType.PROXIMITY}></ToggleChatTypeButton>
+      <ToggleChatTypeButton chatType={ChatType.DIRECT}></ToggleChatTypeButton>
+    </div>
+  );
 }
