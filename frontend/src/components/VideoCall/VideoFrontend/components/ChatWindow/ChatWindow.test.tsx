@@ -152,9 +152,11 @@ describe('ChatWindow', () => {
       const renderData = renderChatWindow();
       const input = (await renderData.findByTestId('chat-input')) as HTMLInputElement;
       expect(getRandomGifMock).not.toHaveBeenCalled();
-      fireEvent.change(input, { target: { value: '/giphy test' } });
+      const randomPhrase = nanoid();
+      fireEvent.change(input, { target: { value: `/giphy ${randomPhrase}` } });
       fireEvent.keyPress(input, { key: 'Enter', code: 'Enter', charCode: 13 });
-      expect(getRandomGifMock).toHaveBeenCalled();
+      expect(getRandomGifMock).toHaveBeenCalledTimes(1);
+      expect(getRandomGifMock).toHaveBeenCalledWith(randomPhrase);
     });
   });
 });

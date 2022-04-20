@@ -135,7 +135,7 @@ export default function ChatInput({
 
       switch (command) {
         case '/giphy': {
-          handleSendGif(message.substring('/giphy'.length), recipients);
+          handleSendGif(message.substring('/giphy'.length).trim(), recipients);
           break;
         }
         default: {
