@@ -3,7 +3,7 @@ import TextConversation, { ChatMessage } from '../../../../../classes/TextConver
 import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import { ChatType } from '../../types';
 
-type ChatContextType = {
+export type ChatContextType = {
   isChatWindowOpen: boolean;
   setIsChatWindowOpen: (isChatWindowOpen: boolean) => void;
   chatType: ChatType;
@@ -35,13 +35,15 @@ export const ChatProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (conversation) {
-      const handleMessageAdded = (message: ChatMessage) =>
-        {setMessages(oldMessages => [...oldMessages, message]);
-          setNewestMessage(message);};
+      const handleMessageAdded = (message: ChatMessage) => {
+        setMessages(oldMessages => [...oldMessages, message]);
+        setNewestMessage(message);
+      };
 
-      const handleProximityMessageAdded = (message: ChatMessage) =>
-        {setProximityMessages(oldMessages => [...oldMessages, message]);
-          setNewestMessage(message);};
+      const handleProximityMessageAdded = (message: ChatMessage) => {
+        setProximityMessages(oldMessages => [...oldMessages, message]);
+        setNewestMessage(message);
+      };
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
