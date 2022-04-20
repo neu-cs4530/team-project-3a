@@ -5,12 +5,18 @@ import { render } from '@testing-library/react';
 import { mock } from 'jest-mock-extended';
 import { nanoid } from 'nanoid';
 import React from 'react';
+import { Socket } from 'socket.io-client';
+import { LocalAudioTrack, Room } from 'twilio-video';
 import Player, { UserLocation } from '../../../../../classes/Player';
 import { CoveyAppState } from '../../../../../CoveyTypes';
 import * as useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import * as usePlayersInTown from '../../../../../hooks/usePlayersInTown';
 import * as useChatContext from '../../hooks/useChatContext/useChatContext';
-import { ChatContextType } from '../ChatProvider';
+import * as useLocalVideoToggle from '../../hooks/useLocalVideoToggle/useLocalVideoToggle';
+import * as useVideoContext from '../../hooks/useVideoContext/useVideoContext';
+import { ChatContextType, ChatProvider } from '../ChatProvider';
+import { IVideoContext, VideoProvider } from '../VideoProvider';
+import * as useRestartAudioTrackOnDeviceChange from '../VideoProvider/useRestartAudioTrackOnDeviceChange/useRestartAudioTrackOnDeviceChange';
 import ChatWindow from './ChatWindow';
 
 describe('ChatWindow', () => {
@@ -23,15 +29,25 @@ describe('ChatWindow', () => {
   const wrappedChatWindow = () => (
     <ChakraProvider>
       <React.StrictMode>
-        <ChatWindow />
+        <ChatProvider>
+          <VideoProvider
+            onError={() => {
+              console.error('Error');
+            }}>
+            <ChatWindow />
+          </VideoProvider>
+        </ChatProvider>
       </React.StrictMode>
     </ChakraProvider>
   );
   const renderChatWindow = () => render(wrappedChatWindow());
   let consoleErrorSpy: jest.SpyInstance<void, [message?: any, ...optionalParms: any[]]>;
+  let useRestartAudioTrackOnDeviceChangeSpy: jest.SpyInstance;
   let usePlayersInTownSpy: jest.SpyInstance<Player[], []>;
   let useChatContextSpy: jest.SpyInstance<ChatContextType, []>;
   let useCoveyAppStateSpy: jest.SpyInstance<CoveyAppState, []>;
+  let useVideoContextSpy: jest.SpyInstance<IVideoContext, []>;
+  let useLocalVideoToggleSpy: jest.SpyInstance<readonly [boolean, () => void]>;
   let players: Player[] = [];
   let townID: string;
   let townFriendlyName: string;
@@ -51,6 +67,12 @@ describe('ChatWindow', () => {
     usePlayersInTownSpy = jest.spyOn(usePlayersInTown, 'default');
     useChatContextSpy = jest.spyOn(useChatContext, 'default');
     useCoveyAppStateSpy = jest.spyOn(useCoveyAppState, 'default');
+    useVideoContextSpy = jest.spyOn(useVideoContext, 'default');
+    useLocalVideoToggleSpy = jest.spyOn(useLocalVideoToggle, 'default');
+    useRestartAudioTrackOnDeviceChangeSpy = jest.spyOn(
+      useRestartAudioTrackOnDeviceChange,
+      'default',
+    );
   });
   beforeEach(() => {
     players = [];
@@ -67,9 +89,22 @@ describe('ChatWindow', () => {
     townID = nanoid();
     townFriendlyName = nanoid();
     const mockAppState = mock<CoveyAppState>();
+    const mockSocket = mock<Socket>();
     mockAppState.currentTownFriendlyName = townFriendlyName;
     mockAppState.currentTownID = townID;
+    mockAppState.socket = mockSocket;
     useCoveyAppStateSpy.mockReturnValue(mockAppState);
+
+    const mockVideoContext = mock<IVideoContext>();
+    const mockRoom = mock<Room>();
+    const mockLocalTrack = mock<LocalAudioTrack>();
+    mockVideoContext.room = mockRoom;
+    mockVideoContext.localTracks = [mockLocalTrack];
+    useVideoContextSpy.mockReturnValue(mockVideoContext);
+
+    useLocalVideoToggleSpy.mockReturnValue([false, () => {}]);
+
+    useRestartAudioTrackOnDeviceChangeSpy.mockImplementation(() => {});
   });
 
   describe('[T1] Basic Rendering', () => {
