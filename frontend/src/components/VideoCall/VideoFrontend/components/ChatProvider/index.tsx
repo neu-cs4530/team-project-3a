@@ -19,6 +19,9 @@ type ChatContextType = {
   setDirectID: (directID: string) => void;
   newestMessage: ChatMessage | null;
   resetNewDirectMessage: (playerID: string) => void;
+  hasUnreadUniversalMessage: boolean;
+  hasUnreadProximityMessage: boolean;
+  unreadDirectMessageIDs: string[];
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
@@ -37,32 +40,40 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
   const [directID, setDirectID] = useState('');
   const [newestMessage, setNewestMessage] = useState<ChatMessage | null>(null);
+  const [hasUnreadUniversalMessage, setHasUnreadUniversalMessage] = useState<boolean>(false);
+  const [hasUnreadProximityMessage, setHasUnreadProximitylMessage] = useState<boolean>(false);
+  const [unreadDirectMessageIDs, setUnreadDirectMessageIDs] = useState<string[]>([]);
 
   useEffect(() => {
     if (conversation) {
       const handleMessageAdded = (message: ChatMessage) => {
         setMessages(oldMessages => [...oldMessages, message]);
+        if (chatType !== ChatType.UNIVERSAL) setHasUnreadUniversalMessage(true);
         setNewestMessage(message);
       };
 
       const handleProximityMessageAdded = (message: ChatMessage) => {
         setProximityMessages(oldMessages => [...oldMessages, message]);
+        if (chatType !== ChatType.PROXIMITY) setHasUnreadProximitylMessage(true);
         setNewestMessage(message);
       };
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
           setNewestMessage(message);
+          const newMessage = directID !== message.senderID;
           const recipient = message.recipients && message.recipients[0];
           if (message.senderID === myPlayerID && recipient) {
+            if (chatType !== ChatType.DIRECT && directID !== message.senderID)
+              setUnreadDirectMessageIDs(oldMessageIDs => [...oldMessageIDs, message.senderID]);
             return {
               ...oldDirectMessages,
               [recipient]: oldDirectMessages[recipient]
                 ? {
                     messages: [...oldDirectMessages[recipient].messages, message],
-                    newMessage: true,
+                    newMessage,
                   }
-                : { messages: [message], newMessage: true },
+                : { messages: [message], newMessage },
             };
           } else {
             return {
@@ -70,11 +81,11 @@ export const ChatProvider: React.FC = ({ children }) => {
               [message.senderID]: oldDirectMessages[message.senderID]
                 ? {
                     messages: [...oldDirectMessages[message.senderID].messages, message],
-                    newMessage: true,
+                    newMessage,
                   }
                 : {
                     messages: [message],
-                    newMessage: true,
+                    newMessage,
                   },
             };
           }
@@ -120,6 +131,9 @@ export const ChatProvider: React.FC = ({ children }) => {
 
   const resetNewDirectMessage = (playerID: string) => {
     setDirectMessages(oldDirectMessages => {
+      setUnreadDirectMessageIDs(oldDirectIDs =>
+        oldDirectIDs.filter(_playerID => _playerID !== playerID),
+      );
       if (oldDirectMessages[playerID]) {
         return {
           ...oldDirectMessages,
@@ -131,6 +145,23 @@ export const ChatProvider: React.FC = ({ children }) => {
     });
   };
 
+  const setChatTypeResetUnread = (chatType: ChatType) => {
+    setChatType(chatType);
+    switch (chatType) {
+      case ChatType.UNIVERSAL:
+        setHasUnreadUniversalMessage(false);
+        break;
+      case ChatType.PROXIMITY:
+        setHasUnreadProximitylMessage(false);
+        break;
+      case ChatType.DIRECT:
+        setUnreadDirectMessageIDs(oldPlayerMessageIDs =>
+          oldPlayerMessageIDs.filter(_playerID => _playerID !== directID),
+        );
+        break;
+    }
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -140,13 +171,16 @@ export const ChatProvider: React.FC = ({ children }) => {
         messages,
         conversation,
         chatType,
-        setChatType,
+        setChatType: setChatTypeResetUnread,
         proximityMessages,
         directMessages,
         directID,
         setDirectID,
         newestMessage,
         resetNewDirectMessage,
+        hasUnreadUniversalMessage,
+        hasUnreadProximityMessage,
+        unreadDirectMessageIDs,
       }}>
       {children}
     </ChatContext.Provider>
