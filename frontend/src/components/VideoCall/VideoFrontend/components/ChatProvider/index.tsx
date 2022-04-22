@@ -11,11 +11,14 @@ type ChatContextType = {
   hasUnreadMessages: boolean;
   messages: ChatMessage[];
   proximityMessages: ChatMessage[];
-  directMessages: { [playerID: string]: ChatMessage[] };
+  directMessages: {
+    [playerID: string]: { messages: ChatMessage[]; newMessage: boolean };
+  };
   conversation: TextConversation | null;
   directID: string;
   setDirectID: (directID: string) => void;
   newestMessage: ChatMessage | null;
+  resetNewDirectMessage: (playerID: string) => void;
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
@@ -27,7 +30,9 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [conversation, setConversation] = useState<TextConversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [proximityMessages, setProximityMessages] = useState<ChatMessage[]>([]);
-  const [directMessages, setDirectMessages] = useState<{ [playerID: string]: ChatMessage[] }>({});
+  const [directMessages, setDirectMessages] = useState<{
+    [playerID: string]: { messages: ChatMessage[]; newMessage: boolean };
+  }>({});
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
   const [directID, setDirectID] = useState('');
@@ -35,13 +40,15 @@ export const ChatProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (conversation) {
-      const handleMessageAdded = (message: ChatMessage) =>
-        {setMessages(oldMessages => [...oldMessages, message]);
-          setNewestMessage(message);};
+      const handleMessageAdded = (message: ChatMessage) => {
+        setMessages(oldMessages => [...oldMessages, message]);
+        setNewestMessage(message);
+      };
 
-      const handleProximityMessageAdded = (message: ChatMessage) =>
-        {setProximityMessages(oldMessages => [...oldMessages, message]);
-          setNewestMessage(message);};
+      const handleProximityMessageAdded = (message: ChatMessage) => {
+        setProximityMessages(oldMessages => [...oldMessages, message]);
+        setNewestMessage(message);
+      };
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
@@ -51,15 +58,24 @@ export const ChatProvider: React.FC = ({ children }) => {
             return {
               ...oldDirectMessages,
               [recipient]: oldDirectMessages[recipient]
-                ? [...oldDirectMessages[recipient], message]
-                : [message],
+                ? {
+                    messages: [...oldDirectMessages[recipient].messages, message],
+                    newMessage: true,
+                  }
+                : { messages: [message], newMessage: true },
             };
           } else {
             return {
               ...oldDirectMessages,
               [message.senderID]: oldDirectMessages[message.senderID]
-                ? [...oldDirectMessages[message.senderID], message]
-                : [message],
+                ? {
+                    messages: [...oldDirectMessages[message.senderID].messages, message],
+                    newMessage: true,
+                  }
+                : {
+                    messages: [message],
+                    newMessage: true,
+                  },
             };
           }
         });
@@ -102,6 +118,19 @@ export const ChatProvider: React.FC = ({ children }) => {
     }
   }, [socket, userName, setConversation]);
 
+  const resetNewDirectMessage = (playerID: string) => {
+    setDirectMessages(oldDirectMessages => {
+      if (oldDirectMessages[playerID]) {
+        return {
+          ...oldDirectMessages,
+          [playerID]: { ...oldDirectMessages[playerID], newMessage: false },
+        };
+      } else {
+        return oldDirectMessages;
+      }
+    });
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -117,6 +146,7 @@ export const ChatProvider: React.FC = ({ children }) => {
         directID,
         setDirectID,
         newestMessage,
+        resetNewDirectMessage,
       }}>
       {children}
     </ChatContext.Provider>
