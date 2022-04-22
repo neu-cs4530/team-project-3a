@@ -1,28 +1,26 @@
-import React, { useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
-import ChatIcon from '../../../icons/ChatIcon';
-import clsx from 'clsx';
-import { makeStyles } from '@material-ui/core';
+import React from 'react';
 import useChatContext from '../../../hooks/useChatContext/useChatContext';
-import useVideoContext from '../../../hooks/useVideoContext/useVideoContext';
 import { ChatType } from '../../../types';
-
-
 
 type ToggleChatTypeButtonProps = {
   chatType: ChatType;
+  className?: string;
 };
 
 export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
-  const {chatType, setChatType} = useChatContext();
+  const { chatType, setChatType } = useChatContext();
 
   const toggleChatType = () => {
     setChatType(props.chatType);
-  }
+  };
 
-  return <Button 
-            onClick={toggleChatType} 
-            disabled={props.chatType === chatType}>
-              {props.chatType.toString()}
-          </Button>;
-};
+  return (
+    <Button
+      onClick={toggleChatType}
+      disabled={props.chatType === chatType}
+      className={props.className}>
+      {props.chatType.toString()}
+    </Button>
+  );
+}
