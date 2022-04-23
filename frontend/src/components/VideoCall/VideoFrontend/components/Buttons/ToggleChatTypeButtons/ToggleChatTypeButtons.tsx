@@ -8,11 +8,18 @@ import useVideoContext from '../../../hooks/useVideoContext/useVideoContext';
 import { ChatType } from '../../../types';
 
 
-
+/**
+ * Type to represent props for a chat type button
+ */
 type ToggleChatTypeButtonProps = {
   chatType: ChatType;
 };
 
+/**
+ * 
+ * @param props Contains a chat type enum, which determines which chat type this button should select
+ * @returns A rendered chat type button
+ */
 export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
   const {chatType, setChatType} = useChatContext();
 
