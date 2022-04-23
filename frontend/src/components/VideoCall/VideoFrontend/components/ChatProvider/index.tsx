@@ -12,13 +12,12 @@ type ChatContextType = {
   messages: ChatMessage[];
   proximityMessages: ChatMessage[];
   directMessages: {
-    [playerID: string]: { messages: ChatMessage[]; newMessage: boolean };
+    [playerID: string]: ChatMessage[];
   };
   conversation: TextConversation | null;
   directID: string;
   setDirectID: (directID: string) => void;
   newestMessage: ChatMessage | null;
-  resetNewDirectMessage: (playerID: string) => void;
   hasUnreadUniversalMessage: boolean;
   hasUnreadProximityMessage: boolean;
   unreadDirectMessageIDs: string[];
@@ -33,9 +32,7 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [conversation, setConversation] = useState<TextConversation | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [proximityMessages, setProximityMessages] = useState<ChatMessage[]>([]);
-  const [directMessages, setDirectMessages] = useState<{
-    [playerID: string]: { messages: ChatMessage[]; newMessage: boolean };
-  }>({});
+  const [directMessages, setDirectMessages] = useState<{ [playerID: string]: ChatMessage[] }>({});
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
   const [directID, setDirectID] = useState('');
@@ -61,32 +58,25 @@ export const ChatProvider: React.FC = ({ children }) => {
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
           setNewestMessage(message);
-          const newMessage = directID !== message.senderID;
           const recipient = message.recipients && message.recipients[0];
           if (message.senderID === myPlayerID && recipient) {
-            if (chatType !== ChatType.DIRECT && directID !== message.senderID)
-              setUnreadDirectMessageIDs(oldMessageIDs => [...oldMessageIDs, message.senderID]);
             return {
               ...oldDirectMessages,
               [recipient]: oldDirectMessages[recipient]
-                ? {
-                    messages: [...oldDirectMessages[recipient].messages, message],
-                    newMessage,
-                  }
-                : { messages: [message], newMessage },
+                ? [...oldDirectMessages[recipient], message]
+                : [message],
             };
           } else {
+            if (directID !== message.senderID || chatType !== ChatType.DIRECT)
+              setUnreadDirectMessageIDs(oldMessageIDs => {
+                if (oldMessageIDs?.includes(message.senderID)) return oldMessageIDs;
+                return [...oldMessageIDs, message.senderID];
+              });
             return {
               ...oldDirectMessages,
               [message.senderID]: oldDirectMessages[message.senderID]
-                ? {
-                    messages: [...oldDirectMessages[message.senderID].messages, message],
-                    newMessage,
-                  }
-                : {
-                    messages: [message],
-                    newMessage,
-                  },
+                ? [...oldDirectMessages[message.senderID], message]
+                : [message],
             };
           }
         });
@@ -102,7 +92,7 @@ export const ChatProvider: React.FC = ({ children }) => {
         conversation.offMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
       };
     }
-  }, [conversation]);
+  }, [conversation, chatType, directID]);
 
   useEffect(() => {
     // If the chat window is closed and there are new messages, set hasUnreadMessages to true
@@ -129,21 +119,11 @@ export const ChatProvider: React.FC = ({ children }) => {
     }
   }, [socket, userName, setConversation]);
 
-  const resetNewDirectMessage = (playerID: string) => {
-    setDirectMessages(oldDirectMessages => {
-      setUnreadDirectMessageIDs(oldDirectIDs =>
-        oldDirectIDs.filter(_playerID => _playerID !== playerID),
-      );
-      if (oldDirectMessages[playerID]) {
-        return {
-          ...oldDirectMessages,
-          [playerID]: { ...oldDirectMessages[playerID], newMessage: false },
-        };
-      } else {
-        return oldDirectMessages;
-      }
-    });
-  };
+  useEffect(() => {
+    setUnreadDirectMessageIDs(oldDirectIDs =>
+      oldDirectIDs.filter(_playerID => _playerID !== directID),
+    );
+  }, [directID]);
 
   const setChatTypeResetUnread = (chatType: ChatType) => {
     setChatType(chatType);
@@ -177,7 +157,6 @@ export const ChatProvider: React.FC = ({ children }) => {
         directID,
         setDirectID,
         newestMessage,
-        resetNewDirectMessage,
         hasUnreadUniversalMessage,
         hasUnreadProximityMessage,
         unreadDirectMessageIDs,

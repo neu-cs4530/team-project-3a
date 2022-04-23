@@ -14,11 +14,10 @@ export default function ChatPlayerDropdown(props: ChatPlayerDropdownProps) {
   const { currentPlayerID, setPlayerID } = props;
   const currentPlayerName = players.find(player => player.id === currentPlayerID)?.userName;
   const appstate = useCoveyAppState();
-  const { directMessages, resetNewDirectMessage } = useChatContext();
+  const { unreadDirectMessageIDs } = useChatContext();
 
   const changeHandler: React.ChangeEventHandler<HTMLSelectElement> = event => {
     setPlayerID(event.currentTarget.value);
-    resetNewDirectMessage(event.currentTarget.value);
   };
 
   return (
@@ -30,7 +29,7 @@ export default function ChatPlayerDropdown(props: ChatPlayerDropdownProps) {
           player.id !== currentPlayerID &&
           player.id !== appstate.myPlayerID && (
             <option
-              style={{ color: directMessages[player.id]?.newMessage ? 'red' : 'black' }}
+              style={{ color: unreadDirectMessageIDs?.includes(player.id) ? '#7936e4' : 'black' }}
               key={player.id}
               value={player.id}>
               {player.userName}
