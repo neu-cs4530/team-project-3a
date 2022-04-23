@@ -5,6 +5,8 @@ import { ChatType } from '../../../types';
 
 type ToggleChatTypeButtonProps = {
   chatType: ChatType;
+  unreadMessages: boolean;
+  className?: string;
 };
 
 export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
@@ -18,7 +20,22 @@ export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
     <Button
       data-testid='chat-button'
       onClick={toggleChatType}
-      disabled={props.chatType === chatType}>
+      disabled={props.chatType === chatType}
+      className={props.className}
+      style={{ display: 'relative' }}>
+      {props.unreadMessages && (
+        <div
+          style={{
+            width: '8px',
+            height: '8px',
+            backgroundColor: '#7936e4',
+            position: 'absolute',
+            top: '5%',
+            right: '5%',
+            borderRadius: '20px',
+          }}
+        />
+      )}
       {props.chatType.toString()}
     </Button>
   );
