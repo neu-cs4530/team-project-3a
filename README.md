@@ -42,7 +42,17 @@ The backend will automatically restart if you change any of the files in the `se
 
 ### Configuring the frontend
 
-Create a `.env` file in the `frontend` directory, with the line: `REACT_APP_TOWNS_SERVICE_URL=http://localhost:8081` (if you deploy the towns service to another location, put that location here instead)
+To run the front-end, you will need a GIPHY account. The GIPHY API is free to use, but an API key is required to enable GIPHY functionality.
+To create an account and configure your local environment:
+
+1. Go to [GIPHY Developer](https://developers.giphy.com/) and create an account.
+2. Create a new app and receive the API key.
+3. Create a `.env` file in the `frontend` directory, setting the values as follows:
+
+| Config Value                  | Description                                                         |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `REACT_APP_GIPHY_API_KEY`     | The GIPHY API key.                                                  |
+| `REACT_APP_TOWNS_SERVICE_URL` | The URL of town service (should be `http://localhost:8081` locally) |
 
 ### Running the frontend
 
