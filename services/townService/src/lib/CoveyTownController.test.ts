@@ -220,7 +220,6 @@ describe('CoveyTownController', () => {
       it('should add a town listener, which should emit a "chatMessage" to the socket when a player sends a direct message with one recepient', async () => {
         TestUtils.setSessionTokenAndTownID(testingTown.coveyTownID, session.sessionToken, mockSocket);
         townSubscriptionHandler(mockSocket);
-        console.log(testingTown.playerIdToSocketId);
         const playerSession = await testingTown.addPlayer(player);
         const chatMessage = {
           author: Player.name,
@@ -229,7 +228,7 @@ describe('CoveyTownController', () => {
           sid: nanoid(),
           body: 'test',
           dateCreated: new Date,
-          recipients?: [playerSession.player.id],
+          recipients: [playerSession.player.id],
         };
         testingTown.onChatMessage(chatMessage);
         expect(mockSocket.emit).toBeCalledWith('chatMessage', chatMessage);
