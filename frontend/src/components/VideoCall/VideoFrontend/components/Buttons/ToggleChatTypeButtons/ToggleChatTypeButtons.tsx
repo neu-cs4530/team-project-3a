@@ -27,6 +27,7 @@ export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
 
   return (
     <Button
+      data-testid='chat-button'
       onClick={toggleChatType}
       disabled={props.chatType === chatType}
       className={props.className}

@@ -135,7 +135,7 @@ export default function ChatInput({
 
       switch (command) {
         case '/giphy': {
-          handleSendGif(message.substring('/giphy'.length), recipients);
+          handleSendGif(message.substring('/giphy'.length).trim(), recipients);
           break;
         }
         default: {
@@ -177,6 +177,7 @@ export default function ChatInput({
           ref={textInputRef}
           onFocus={() => setIsTextareaFocused(true)}
           onBlur={() => setIsTextareaFocused(false)}
+          data-testid='chat-input'
         />
       </div>
     </div>

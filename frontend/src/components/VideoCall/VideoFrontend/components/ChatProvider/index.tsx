@@ -3,7 +3,7 @@ import TextConversation, { ChatMessage } from '../../../../../classes/TextConver
 import useCoveyAppState from '../../../../../hooks/useCoveyAppState';
 import { ChatType } from '../../types';
 
-type ChatContextType = {
+export type ChatContextType = {
   isChatWindowOpen: boolean;
   setIsChatWindowOpen: (isChatWindowOpen: boolean) => void;
   chatType: ChatType;
