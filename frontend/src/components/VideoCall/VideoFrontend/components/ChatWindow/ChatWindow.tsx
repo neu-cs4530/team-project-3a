@@ -63,12 +63,14 @@ export default function ChatWindow() {
       {chatType === ChatType.DIRECT && <MessageList messages={directMessages[directID] ?? []} />}
       {chatType === ChatType.PROXIMITY && <MessageList messages={proximityMessages} />}
       {chatType === ChatType.UNIVERSAL && <MessageList messages={messages} />}
-      <ChatInput
-        conversation={conversation!}
-        isChatWindowOpen={isChatWindowOpen}
-        chatType={chatType}
-        directID={directID}
-      />
+      {(chatType !== ChatType.DIRECT || directID !== '') &&
+        <ChatInput
+          conversation={conversation!}
+          isChatWindowOpen={isChatWindowOpen}
+          chatType={chatType}
+          directID={directID}
+        />
+      }
     </aside>
   );
 }

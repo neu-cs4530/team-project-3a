@@ -3,12 +3,21 @@ import React from 'react';
 import useChatContext from '../../../hooks/useChatContext/useChatContext';
 import { ChatType } from '../../../types';
 
+
+/**
+ * Type to represent props for a chat type button
+ */
 type ToggleChatTypeButtonProps = {
   chatType: ChatType;
   unreadMessages: boolean;
   className?: string;
 };
 
+/**
+ * 
+ * @param props Contains a chat type enum, which determines which chat type this button should select
+ * @returns A rendered chat type button
+ */
 export default function ToggleChatTypeButton(props: ToggleChatTypeButtonProps) {
   const { chatType, setChatType } = useChatContext();
 
