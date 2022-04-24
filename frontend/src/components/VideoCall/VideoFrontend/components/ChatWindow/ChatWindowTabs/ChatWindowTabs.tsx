@@ -1,9 +1,7 @@
-import { makeStyles, createStyles } from "@material-ui/core";
-import useChatContext from "../../../hooks/useChatContext/useChatContext";
-import CloseIcon from "../../../icons/CloseIcon";
-import { ChatType } from "../../../types";
-import ToggleChatButton from "../../Buttons/ToggleChatButton/ToggleChatButton";
-import ToggleChatTypeButton from "../../Buttons/ToggleChatTypeButtons/ToggleChatTypeButtons";
+import { createStyles, makeStyles } from '@material-ui/core';
+import useChatContext from '../../../hooks/useChatContext/useChatContext';
+import { ChatType } from '../../../types';
+import ToggleChatTypeButton from '../../Buttons/ToggleChatTypeButtons/ToggleChatTypeButtons';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -26,17 +24,55 @@ const useStyles = makeStyles(() =>
       border: '0',
       padding: '0.4em',
     },
-  })
+    universalChat: {
+      'backgroundColor': '#89CFF0',
+      'margin': '2px',
+      '&.Mui-disabled': {
+        backgroundColor: '#76c5ea',
+        color: '#ffffff',
+      },
+    },
+    proximityChat: {
+      'backgroundColor': '#F8C8DC',
+      'margin': '2px',
+      '&.Mui-disabled': {
+        backgroundColor: '#f8abcb',
+        color: '#ffffff',
+      },
+    },
+    directChat: {
+      'backgroundColor': '#85e085',
+      'margin': '2px',
+      '&.Mui-disabled': {
+        backgroundColor: '#6fda6f',
+        color: '#ffffff',
+      },
+    },
+  }),
 );
 
 export default function ChatWindowTabs() {
-    const classes = useStyles();
+  const classes = useStyles();
+  const {
+    hasUnreadUniversalMessage,
+    hasUnreadProximityMessage,
+    unreadDirectMessageIDs,
+  } = useChatContext();
 
-    return (
-      <div className={classes.container}>
-        <ToggleChatTypeButton chatType={ChatType.UNIVERSAL}></ToggleChatTypeButton>
-        <ToggleChatTypeButton chatType={ChatType.PROXIMITY}></ToggleChatTypeButton>
-        <ToggleChatTypeButton chatType={ChatType.DIRECT}></ToggleChatTypeButton>
-      </div>
-    );
+  return (
+    <div className={classes.container}>
+      <ToggleChatTypeButton
+        className={classes.universalChat}
+        chatType={ChatType.UNIVERSAL}
+        unreadMessages={hasUnreadUniversalMessage}></ToggleChatTypeButton>
+      <ToggleChatTypeButton
+        className={classes.proximityChat}
+        chatType={ChatType.PROXIMITY}
+        unreadMessages={hasUnreadProximityMessage}></ToggleChatTypeButton>
+      <ToggleChatTypeButton
+        className={classes.directChat}
+        chatType={ChatType.DIRECT}
+        unreadMessages={unreadDirectMessageIDs?.length !== 0}></ToggleChatTypeButton>
+    </div>
+  );
 }

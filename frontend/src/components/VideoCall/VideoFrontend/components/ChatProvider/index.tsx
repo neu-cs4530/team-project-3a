@@ -11,11 +11,16 @@ type ChatContextType = {
   hasUnreadMessages: boolean;
   messages: ChatMessage[];
   proximityMessages: ChatMessage[];
-  directMessages: { [playerID: string]: ChatMessage[] };
+  directMessages: {
+    [playerID: string]: ChatMessage[];
+  };
   conversation: TextConversation | null;
   directID: string;
   setDirectID: (directID: string) => void;
   newestMessage: ChatMessage | null;
+  hasUnreadUniversalMessage: boolean;
+  hasUnreadProximityMessage: boolean;
+  unreadDirectMessageIDs: string[];
 };
 
 export const ChatContext = createContext<ChatContextType>(null!);
@@ -32,16 +37,23 @@ export const ChatProvider: React.FC = ({ children }) => {
   const [chatType, setChatType] = useState(ChatType.UNIVERSAL);
   const [directID, setDirectID] = useState('');
   const [newestMessage, setNewestMessage] = useState<ChatMessage | null>(null);
+  const [hasUnreadUniversalMessage, setHasUnreadUniversalMessage] = useState<boolean>(false);
+  const [hasUnreadProximityMessage, setHasUnreadProximitylMessage] = useState<boolean>(false);
+  const [unreadDirectMessageIDs, setUnreadDirectMessageIDs] = useState<string[]>([]);
 
   useEffect(() => {
     if (conversation) {
-      const handleMessageAdded = (message: ChatMessage) =>
-        {setMessages(oldMessages => [...oldMessages, message]);
-          setNewestMessage(message);};
+      const handleMessageAdded = (message: ChatMessage) => {
+        setMessages(oldMessages => [...oldMessages, message]);
+        if (chatType !== ChatType.UNIVERSAL) setHasUnreadUniversalMessage(true);
+        setNewestMessage(message);
+      };
 
-      const handleProximityMessageAdded = (message: ChatMessage) =>
-        {setProximityMessages(oldMessages => [...oldMessages, message]);
-          setNewestMessage(message);};
+      const handleProximityMessageAdded = (message: ChatMessage) => {
+        setProximityMessages(oldMessages => [...oldMessages, message]);
+        if (chatType !== ChatType.PROXIMITY) setHasUnreadProximitylMessage(true);
+        setNewestMessage(message);
+      };
 
       const handleDirectMessageAdded = (message: ChatMessage) =>
         setDirectMessages(oldDirectMessages => {
@@ -55,6 +67,11 @@ export const ChatProvider: React.FC = ({ children }) => {
                 : [message],
             };
           } else {
+            if (directID !== message.senderID || chatType !== ChatType.DIRECT)
+              setUnreadDirectMessageIDs(oldMessageIDs => {
+                if (oldMessageIDs?.includes(message.senderID)) return oldMessageIDs;
+                return [...oldMessageIDs, message.senderID];
+              });
             return {
               ...oldDirectMessages,
               [message.senderID]: oldDirectMessages[message.senderID]
@@ -75,7 +92,7 @@ export const ChatProvider: React.FC = ({ children }) => {
         conversation.offMessageAdded(handleProximityMessageAdded, ChatType.PROXIMITY);
       };
     }
-  }, [conversation]);
+  }, [conversation, chatType, directID]);
 
   useEffect(() => {
     // If the chat window is closed and there are new messages, set hasUnreadMessages to true
@@ -102,6 +119,29 @@ export const ChatProvider: React.FC = ({ children }) => {
     }
   }, [socket, userName, setConversation]);
 
+  useEffect(() => {
+    setUnreadDirectMessageIDs(oldDirectIDs =>
+      oldDirectIDs.filter(_playerID => _playerID !== directID),
+    );
+  }, [directID]);
+
+  const setChatTypeResetUnread = (chatType: ChatType) => {
+    setChatType(chatType);
+    switch (chatType) {
+      case ChatType.UNIVERSAL:
+        setHasUnreadUniversalMessage(false);
+        break;
+      case ChatType.PROXIMITY:
+        setHasUnreadProximitylMessage(false);
+        break;
+      case ChatType.DIRECT:
+        setUnreadDirectMessageIDs(oldPlayerMessageIDs =>
+          oldPlayerMessageIDs.filter(_playerID => _playerID !== directID),
+        );
+        break;
+    }
+  };
+
   return (
     <ChatContext.Provider
       value={{
@@ -111,12 +151,15 @@ export const ChatProvider: React.FC = ({ children }) => {
         messages,
         conversation,
         chatType,
-        setChatType,
+        setChatType: setChatTypeResetUnread,
         proximityMessages,
         directMessages,
         directID,
         setDirectID,
         newestMessage,
+        hasUnreadUniversalMessage,
+        hasUnreadProximityMessage,
+        unreadDirectMessageIDs,
       }}>
       {children}
     </ChatContext.Provider>
