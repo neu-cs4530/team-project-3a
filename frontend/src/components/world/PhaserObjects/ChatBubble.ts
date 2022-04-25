@@ -3,6 +3,11 @@ import { ChatMessage } from "../../../classes/TextConversation"
 const CHAT_BUBBLE_DURATION = 5000;
 const TEXT_SCROLL_DELAY = 50;
 const MAX_MESSAGE_LENGTH = 20;
+const BUBBLE_BACKGROUND_COLORS = {
+  Universal: '#89CFF0',
+  Proximity: '#F8C8DC',
+  Direct: '#85e085',
+};
 
 /**
  * Object for creating chat bubbles on a phaser scene
@@ -24,6 +29,7 @@ export default class ChatBubble {
      * @param value the new chat message that the chat bubble should render
     */
     public setMessage(value: ChatMessage) {
+        this.bubbleText.setBackgroundColor(BUBBLE_BACKGROUND_COLORS[value.chatType]);
         if (this.timer) {
             clearTimeout(this.timer)
         }
